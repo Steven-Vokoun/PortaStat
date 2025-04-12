@@ -8,7 +8,7 @@ import os
 from Functions.eis import fit_eis_data, export_to_usb, run_demo_EIS_experiment, calibrate_all, set_output_amplitude, conduct_experiment
 from Libraries.MUX_and_CLK_Library import Calibration_Mux, Output_Gain_Mux, Input_Gain_Mux, Electrode_Switch, LTC6904
 from Libraries.AD5933_Library import AD5933
-
+from Libraries.mcp23017 import MCP23017
 
 class EISWindow:
     def __init__(self, plot_frame, controls_frame, button_frame, toolbar_frame):
@@ -92,10 +92,12 @@ class EISWindow:
     class HardwareComponents:
         def __init__(self):
             self.sensor = AD5933()
+            self.GPIO_Expander = MCP23017()
             self.Calibration_Mux = Calibration_Mux()
             self.Output_Gain_Mux = Output_Gain_Mux()
             self.Input_Gain_Mux = Input_Gain_Mux()
             self.Electrode_Mux = Electrode_Switch()
+            self.GPIO_Expander = MCP23017()
             self.CLK = LTC6904()
     
     '''

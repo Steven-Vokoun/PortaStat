@@ -1,3 +1,28 @@
+import os
+
+try:
+    from smbus2 import SMBus
+except ImportError:
+    if os.name == 'nt':  # Check if the operating system is Windows
+        print("smbus2 library is not supported on Windows, using dummy class instead...")
+        class SMBus:
+            def __init__(self, *args, **kwargs):
+                pass
+            def read_byte_data(self, *args, **kwargs):
+                return 0x00
+            def write_byte_data(self, *args, **kwargs):
+                pass
+            def read_i2c_block_data(self, *args, **kwargs):
+                return [0x00]*4
+        smbus2 = SMBus
+    else:
+        ValueError("smbus2 library is not installed")
+
+
+
+
+
+
 IODIRA   = 0x00  # Pin direction register
 IODIRB   = 0x01  # Pin direction register
 IPOLA    = 0x02
@@ -61,7 +86,7 @@ class I2C():
 		Wrapper class for the smbus
 		:param smbus: the smbus to send and receive data from smbus.SMBus(1)
 		"""
-		self.bus = smbus
+		self.bus = SMBus(1)
 
 	def write_to(self, address, offset, value):
 		self.bus.write_byte_data(address, offset, value)
@@ -104,13 +129,12 @@ class MCP23017:
 	IOCON    | 0B | BANK    | MIRROR | SEQOP  | DISSLW | HAEN   | ODR    | INTPOL | -      | 0000 0000
 	GPPUA    | 0C | PU7     | PU6    | PU5    | PU4    | PU3    | PU2    | PU1    | PU0    | 0000 0000
 	GPPUB    | 0D | PU7     | PU6    | PU5    | PU4    | PU3    | PU2    | PU1    | PU0    | 0000 0000
-
-
 	"""
 
-	def __init__(self, address, i2c):
-		self.i2c = i2c
+	def __init__(self, address = 0x20):
+		self.i2c = I2C()
 		self.address = address
+		self.set_all_output()
 
 	def set_all_output(self):
 		""" sets all GPIOs as OUTPUT"""
