@@ -133,28 +133,68 @@ class Calibration_Mux:
             GPIO.output(22, GPIO.HIGH)
 
 class Output_Gain_Mux:
-    def __init__(self):
-        pins = [27,17]  # 27 is A1, 17 is A0
-        GPIO.setmode(GPIO.BCM)
-        for pin in pins:
-            GPIO.setup(pin, GPIO.OUT)
-            GPIO.output(pin, GPIO.LOW)
+#GPA2 = SSR3 = RO0
+#GPA1 = SSR4 = RO1
+#GPA0 = SSR5 = RO2
+
+#RO0 RO1 RO2
+#0 0 0 = 1k
+#0 0 1 = 1k
+#0 1 0 = 5k
+#0 1 1 = 5k
+#1 0 0 = 10k
+#1 0 1 = 50k
+#1 1 0 = 75k
+#1 1 1 = 100k
+
+    def __init__(self, GPIO_Expander, sensor):
+        self.GPIO_Expander = GPIO_Expander
+        self.sensor = sensor
+        GPIO_Expander.digital_write(GPA2, LOW)
+        GPIO_Expander.digital_write(GPA1, LOW)
+        GPIO_Expander.digital_write(GPA0, LOW)
     def select_gain(self, setting):
         if setting == '1x' or setting == 0:
-            GPIO.output(27, GPIO.LOW)
-            GPIO.output(17, GPIO.LOW)
-        elif setting == '.1x' or setting == 1:
-            GPIO.output(27, GPIO.LOW)
-            GPIO.output(17, GPIO.HIGH)
-        elif setting == '.01x' or setting == 2:
-            GPIO.output(27, GPIO.HIGH)
-            GPIO.output(17, GPIO.LOW)
-        elif setting == '1x_uncorrected' or setting == 3:
-            GPIO.output(27, GPIO.HIGH)
-            GPIO.output(17, GPIO.HIGH)
+            GPIO_Expander.digital_write(GPA2, HIGH)
+            GPIO_Expander.digital_write(GPA1, HIGH)
+            GPIO_Expander.digital_write(GPA0, HIGH)
+        elif setting == '.75x' or setting == 1:
+            GPIO_Expander.digital_write(GPA2, HIGH)
+            GPIO_Expander.digital_write(GPA1, HIGH)
+            GPIO_Expander.digital_write(GPA0, LOW)
+        elif setting == '.5x' or setting == 2:
+            GPIO_Expander.digital_write(GPA2, HIGH)
+            GPIO_Expander.digital_write(GPA1, LOW)
+            GPIO_Expander.digital_write(GPA0, HIGH)
+        elif setting == '.1x' or setting == 3:
+            GPIO_Expander.digital_write(GPA2, HIGH)
+            GPIO_Expander.digital_write(GPA1, LOW)
+            GPIO_Expander.digital_write(GPA0, LOW)
+        elif setting == '.05x' or setting == 4:
+            GPIO_Expander.digital_write(GPA2, LOW)
+            GPIO_Expander.digital_write(GPA1, HIGH)
+            GPIO_Expander.digital_write(GPA0, LOW)
+        elif setting == '.01x' or setting == 5:
+            GPIO_Expander.digital_write(GPA2, LOW)
+            GPIO_Expander.digital_write(GPA1, LOW)
+            GPIO_Expander.digital_write(GPA0, LOW)
 
 class Input_Gain_Mux:
-    def __init__(self):
+#GPA5 = SSR0 = RI0
+#GPA4 = SSR1 = RI1
+#GPA3 = SSR2 = RI2
+
+#RI0 RI1 RI2
+#0 0 0 = 10
+#0 0 1 = 10
+#0 1 0 = 100
+#0 1 1 = 100
+#1 0 0 = 1k
+#1 0 1 = 10k
+#1 1 0 = 100k
+#1 1 1 = 1Meg
+
+    def __init__(self, GPIO_Expander, sensor):
         pins = [24,23]  # 24 is A1, 23 is A0
         GPIO.setmode(GPIO.BCM)
         for pin in pins:
@@ -173,14 +213,3 @@ class Input_Gain_Mux:
         elif setting == '1Mx' or setting == 1e6 or setting == 3:
             GPIO.output(24, GPIO.HIGH)
             GPIO.output(23, GPIO.HIGH)
-
-class Electrode_Switch:
-    def __init__(self):
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(25, GPIO.OUT)
-        GPIO.output(25, GPIO.LOW)
-    def select_electrode(self, setting):
-        if setting == '2 Electrode' or setting == 0:
-            GPIO.output(25, GPIO.LOW)
-        elif setting == '3 Electrode' or setting == 1:
-            GPIO.output(25, GPIO.HIGH)

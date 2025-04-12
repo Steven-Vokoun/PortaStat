@@ -82,7 +82,6 @@ class EISWindow:
                     self.Calibration_Mux = type('DummyMux', (), {'select_calibration': lambda x: None})()
                     self.Output_Gain_Mux = type('DummyMux', (), {'select_gain': lambda x: None})()
                     self.Input_Gain_Mux = type('DummyMux', (), {'select_gain': lambda x: None})()
-                    self.Electrode_Mux = type('DummyMux', (), {'select_electrode': lambda x: None})()
                     self.CLK = type('DummyCLK', (), {'Turn_On_Clock': lambda x: None})()
             
             self.hardware = DummyHardware()
@@ -92,13 +91,11 @@ class EISWindow:
     class HardwareComponents:
         def __init__(self):
             self.sensor = AD5933()
+            self.CLK = LTC6904()            
             self.GPIO_Expander = MCP23017()
-            self.Calibration_Mux = Calibration_Mux()
-            self.Output_Gain_Mux = Output_Gain_Mux()
-            self.Input_Gain_Mux = Input_Gain_Mux()
-            self.Electrode_Mux = Electrode_Switch()
-            self.GPIO_Expander = MCP23017()
-            self.CLK = LTC6904()
+            self.Calibration_Mux = Calibration_Mux(self.GPIO_Expander)
+            self.Output_Gain_Mux = Output_Gain_Mux(self.GPIO_Expander, self.sensor)
+            self.Input_Gain_Mux = Input_Gain_Mux(self.GPIO_Expander, self.sensor)
     
     '''
     def Temporary_Test(self):
