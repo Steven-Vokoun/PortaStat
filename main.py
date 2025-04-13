@@ -39,6 +39,7 @@ class MainApplication(ctk.CTk):
         self.readme_text_area = None
 
     def setup_toolbar(self):
+        """Frame for top row with readme and close buttons"""
         self.toolbar_frame = ctk.CTkFrame(self.main_frame)
         self.toolbar_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
 
@@ -49,12 +50,15 @@ class MainApplication(ctk.CTk):
         close_button.pack(side=ctk.RIGHT, padx=10)
 
     def setup_frames(self):
+        # frame for plot
         self.plot_frame = ctk.CTkFrame(self.main_frame)
         self.plot_frame.grid(row=1, column=0, sticky="nsew")
 
+        # frame for: experiment settings, analysis settings, experimental control, & results
         self.controls_frame = ctk.CTkFrame(self.main_frame)
         self.controls_frame.grid(row=1, column=1, sticky="nsew")
 
+        # frame for plot types
         self.button_frame = ctk.CTkFrame(self.main_frame)
         self.button_frame.grid(row=2, column=0, columnspan=2, sticky="ew")
 
