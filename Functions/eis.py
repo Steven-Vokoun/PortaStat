@@ -110,13 +110,10 @@ def set_output_amplitude(voltage, sensor, relays, send_notification):
     elif voltage == "10mV" or voltage == '10' or voltage == 10:
         sensor.set_output_voltage(.2)
         relays.set_output_gain('.05x')
-    elif voltage == "10mV" or voltage == '10' or voltage == 10:
-        sensor.set_output_voltage(.2)
-        relays.set_output_gain('.05x')
     elif voltage == "20mV" or voltage == '20' or voltage == 20:
         sensor.set_output_voltage(.2)
         relays.set_output_gain('.1x')
-    elif voltage == "38mV" or voltage == '38' or voltage == 38:
+    elif voltage == "40mV" or voltage == '40' or voltage == 40:
         sensor.set_output_voltage(.4)
         relays.set_output_gain('.1x')
     elif voltage == "50mV" or voltage == '50' or voltage == 50:

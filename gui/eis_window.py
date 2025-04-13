@@ -217,7 +217,7 @@ class EISWindow:
         self.voltage_label = ctk.CTkLabel(self.calibrate_voltage_frame, text="Voltage (mV):", font=("Helvetica", 12))
         self.voltage_label.pack(side=ctk.LEFT, padx=5)
         
-        voltage_values = ["2", "4", "10", "20", "38", "100", "200", "380", "1000", "2000"]
+        voltage_values = ["2", "4", "10", "20", "40", "50", "100", "150", "200", "300", "400", "500", "750", "1000", "1500", "2000"]
         self.voltage_dropdown = ctk.CTkComboBox(
             self.calibrate_voltage_frame,
             variable=self.voltage,
@@ -325,7 +325,7 @@ class EISWindow:
         self.step_size_slider.set(step_value)
 
     def update_impedance_label(self, value):
-        impedance_values = {0: '100', 1: '10k', 2: '100k', 3: '1Meg', 4: '10Meg'}
+        impedance_values = {0: '10', 1: '100', 2: '1k', 3: '10k', 4: '100k', 5: '1Meg'}
         step_value = int(value)
         self.impedance_value_label.configure(text=impedance_values[step_value])
         self.impedance_slider.set(step_value)
@@ -345,7 +345,7 @@ class EISWindow:
         output_label = ctk.CTkLabel(output_frame, text="Output Location:", font=("Helvetica", 12))
         output_label.pack(side=ctk.LEFT, padx=5)
         
-        locations = ['Counter0', 'Counter1', 'Randles', '100', '10k', '100k', '1Meg', '10Meg']
+        locations = ['Counter', 'Randles', '100', '1k', '10k', '50k', '100k', '500k', '1Meg', '10Meg']
         self.output_location_dropdown = ctk.CTkComboBox(
             output_frame,
             variable=self.output_location,

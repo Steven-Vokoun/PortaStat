@@ -67,51 +67,24 @@ class LTC6904:
         self.write_registers(MS, LS)
 
 '''
-GPA5 = SSR0 = RI0
-GPA4 = SSR1 = RI1
-GPA3 = SSR2 = RI2
+INPUTS:                 OUTPUTS:                CALIBRATION:
+GPA5 = SSR0 = RI0       GPA2 = SSR3 = RO0	    GPB2 = CAL0
+GPA4 = SSR1 = RI1	    GPA1 = SSR4 = RO1	    GPB3 = CAL1
+GPA3 = SSR2 = RI2	    GPA0 = SSR5 = RO2	    GPB4 = CAL2
+		                                        GPB5 = CAL3
+		                                        GPB6 = CAL4
 
-GPA2 = SSR3 = RO0
-GPA1 = SSR4 = RO1
-GPA0 = SSR5 = RO2
-
-GPB2 = CAL0
-GPB3 = CAL1
-GPB4 = CAL2
-GPB5 = CAL3
-GPB6 = CAL4
-
-RI0 RI1 RI2
-0 0 0 = 10
-0 0 1 = 10
-0 1 0 = 100
-0 1 1 = 100
-1 0 0 = 1k
-1 0 1 = 10k
-1 1 0 = 100k
-1 1 1 = 1Meg
-
-RO0 RO1 RO2
-0 0 0 = 1k
-0 0 1 = 1k
-0 1 0 = 5k
-0 1 1 = 5k
-1 0 0 = 10k
-1 0 1 = 50k
-1 1 0 = 75k
-1 1 1 = 100k
-
-CAL0 CAL1 CAL2 CAL3 CAL4
-00xxx = 100
-01xxx = 1k
-100xx = 10k
-101xx = 50k
-1100x = 100k
-1101x = 500k
-11100 - 1M
-11101 = 10M
-11110 = Randles
-11111 = Counter
+RI0 RI1 RI2	            RO0 RO1 RO2	        CAL0 CAL1 CAL2 CAL3 CAL4
+0 0 0 = 10	            0 0 0 = 1k	        00xxx = 100
+0 0 1 = 10	            0 0 1 = 1k	        01xxx = 1k
+0 1 0 = 100	            0 1 0 = 5k	        100xx = 10k
+0 1 1 = 100	            0 1 1 = 5k	        101xx = 50k
+1 0 0 = 1k	            1 0 0 = 10k	        1100x = 100k
+1 0 1 = 10k	            1 0 1 = 50k	        1101x = 500k
+1 1 0 = 100k	        1 1 0 = 75k	        11100 - 1M
+1 1 1 = 1Meg	        1 1 1 = 100k	    11101 = 10M
+		                                    11110 = Randles
+		                                    11111 = Counter
 '''
 
 class Relays:
@@ -176,7 +149,7 @@ class Relays:
             self.mcp.digital_write(GPB4, HIGH)
             self.mcp.digital_write(GPB5, HIGH)
             self.mcp.digital_write(GPB6, LOW)
-        elif setting == 'Randles' or setting == 9:
+        elif setting == 'Counter' or setting == 9:
             self.mcp.digital_write(GPB2, HIGH)
             self.mcp.digital_write(GPB3, HIGH)
             self.mcp.digital_write(GPB4, HIGH)
