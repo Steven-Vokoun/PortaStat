@@ -59,13 +59,15 @@ class EISWindow:
             self.sensor = AD5933() if not dummy else type('DummySensor', (), {
                             'measure_temperature': lambda: 25,
                             'send_cmd': lambda x: None,
-                            'set_output_voltage': lambda x,y: None
+                            'set_output_voltage': lambda x,y: None,
+                            'Calibration_Sweep': lambda a,b,c,d,e,f,g: None
                         })()
             self.CLK = LTC6904() if not dummy else type('DummyCLK', (), {
                             'Turn_On_Clock': lambda x: None
                         })()
             self.relays= Relays() if not dummy else type('DummyRelay', (), {
                             'select_gain': lambda x: None,
+                            'set_input_gain': lambda x,y: None,
                             'set_output_gain': lambda x,y: None,
                             'select_calibration': lambda x,y: None
                         })()
@@ -97,6 +99,10 @@ class EISWindow:
     '''
 
     def show_temp(self):
+        # Check if widgets already exist to prevent duplicates
+        if hasattr(self, 'status_frame'):
+            return
+
         self.temperature = 25
         if os.name == 'nt':
             pass
@@ -109,8 +115,8 @@ class EISWindow:
         self.status_frame.pack(side=ctk.RIGHT, padx=10)
 
         # Temperature display
-        temp_icon = ctk.CTkLabel(self.status_frame, text=None, image=self.emoji("🌡️", offset=9))
-        temp_icon.pack(side=ctk.LEFT, padx=(10,0))
+        self.temp_icon = ctk.CTkLabel(self.status_frame, text=None, image=self.emoji("🌡️", offset=9))
+        self.temp_icon.pack(side=ctk.LEFT, padx=(10,0))
 
         self.Temperature_Widget = ctk.CTkLabel(
             self.status_frame,
@@ -120,8 +126,8 @@ class EISWindow:
         self.Temperature_Widget.pack(side=ctk.LEFT, padx=(0,5))
 
         # Separator
-        separator = ctk.CTkLabel(self.status_frame, text="|", font=("Helvetica", 14))
-        separator.pack(side=ctk.LEFT, padx=5)
+        self.separator = ctk.CTkLabel(self.status_frame, text="|", font=("Helvetica", 14))
+        self.separator.pack(side=ctk.LEFT, padx=5)
 
         # Battery display
         self.battery_icon = ctk.CTkLabel(self.status_frame, text=None, image=self.emoji("🔋"))
@@ -163,7 +169,7 @@ class EISWindow:
             self.battery_widget.configure(text="N/A")
 
         # Schedule next update in 30 seconds using the root window
-        self.root.after(30000, self.update_battery_level)
+        self.battery_update_id = self.root.after(30000, self.update_battery_level)
 
     def setup_plot(self):
         matplotlib.rcParams['font.size'] = 10
@@ -504,7 +510,16 @@ class EISWindow:
         self.clear_frame(self.controls_frame)
         self.clear_frame(self.button_frame)
         self.clear_frame(self.plot_frame)
-        self.Temperature_Widget.destroy()
+
+        # Remove all status widgets
+        if hasattr(self, 'status_frame'):
+            self.status_frame.destroy()
+            delattr(self, 'status_frame')
+
+        # Cancel any pending battery updates
+        if hasattr(self, 'battery_update_id'):
+            self.root.after_cancel(self.battery_update_id)
+            delattr(self, 'battery_update_id')
 
     def emoji(self, emoji, offset=0, size=32):
         """
@@ -523,4 +538,3 @@ class EISWindow:
                 embedded_color=True, font=font, anchor="mm")
         img = CTkImage(img, size=(size, size))
         return img
-    
