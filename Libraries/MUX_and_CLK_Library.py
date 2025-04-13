@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from Libraries.mcp23017 import MCP23017
 
 try:
     from smbus2 import SMBus
@@ -52,10 +53,7 @@ GPB3 = CAL1
 GPB4 = CAL2
 GPB5 = CAL3
 GPB6 = CAL4
-GPB7 = CAL5
-'''
 
-'''
 RI0 RI1 RI2
 0 0 0 = 10
 0 0 1 = 10
@@ -76,7 +74,7 @@ RO0 RO1 RO2
 1 1 0 = 75k
 1 1 1 = 100k
 
-CAL0 CAL1 CAL2 CAL3 CAL4 CAL5
+CAL0 CAL1 CAL2 CAL3 CAL4
 00xxx = 100
 01xxx = 1k
 100xx = 10k
@@ -89,71 +87,87 @@ CAL0 CAL1 CAL2 CAL3 CAL4 CAL5
 11111 = Counter
 '''
 
-
-class Calibration_Mux:
+class Relays:
     def __init__(self):
-        GPIO.setwarnings(False)
-        pins = [9,10,22]  # 9 is A2, 10 A1, 22 A0
-        GPIO.setmode(GPIO.BCM)
-        for pin in pins:
-            GPIO.setup(pin, GPIO.OUT)
-            GPIO.output(pin, GPIO.LOW)
-    def select_calibration(self, setting):
-        if setting == '10Meg' or setting == 10e6 or setting == 0:
-            GPIO.output(9, GPIO.LOW)
-            GPIO.output(10, GPIO.LOW)
-            GPIO.output(22, GPIO.LOW)
-        elif setting == '1Meg' or setting == 1e6 or setting == 1:
-            GPIO.output(9, GPIO.LOW)
-            GPIO.output(10, GPIO.LOW)
-            GPIO.output(22, GPIO.HIGH)
-        elif setting == '100k' or setting == 100e3 or setting == 2:
-            GPIO.output(9, GPIO.LOW)
-            GPIO.output(10, GPIO.HIGH)
-            GPIO.output(22, GPIO.LOW)
-        elif setting == '10k' or setting == 10e3 or setting == 3:
-            GPIO.output(9, GPIO.LOW)
-            GPIO.output(10, GPIO.HIGH)
-            GPIO.output(22, GPIO.HIGH)
-        elif setting == '100' or setting == 100 or setting == 4:
-            GPIO.output(9, GPIO.HIGH)
-            GPIO.output(10, GPIO.LOW)
-            GPIO.output(22, GPIO.LOW)
-        elif setting == 'Randles' or setting == 5:
-            GPIO.output(9, GPIO.HIGH)
-            GPIO.output(10, GPIO.LOW)
-            GPIO.output(22, GPIO.HIGH)
-        elif setting == 'Counter0' or setting == 6:
-            GPIO.output(9, GPIO.HIGH)
-            GPIO.output(10, GPIO.HIGH)
-            GPIO.output(22, GPIO.LOW)
-        elif setting == 'Counter1' or setting == 7:
-            GPIO.output(9, GPIO.HIGH)
-            GPIO.output(10, GPIO.HIGH)
-            GPIO.output(22, GPIO.HIGH)
-
-class Output_Gain_Mux:
-#GPA2 = SSR3 = RO0
-#GPA1 = SSR4 = RO1
-#GPA0 = SSR5 = RO2
-
-#RO0 RO1 RO2
-#0 0 0 = 1k
-#0 0 1 = 1k
-#0 1 0 = 5k
-#0 1 1 = 5k
-#1 0 0 = 10k
-#1 0 1 = 50k
-#1 1 0 = 75k
-#1 1 1 = 100k
-
-    def __init__(self, GPIO_Expander, sensor):
-        self.GPIO_Expander = GPIO_Expander
-        self.sensor = sensor
+        self.GPIO_Expander = MCP23017()
+        #Cal Board
+        GPIO_Expander.digital_write(GPB2, LOW)
+        GPIO_Expander.digital_write(GPB3, LOW)
+        GPIO_Expander.digital_write(GPB4, LOW)
+        GPIO_Expander.digital_write(GPB5, LOW)
+        GPIO_Expander.digital_write(GPB6, LOW)
+        #Output
         GPIO_Expander.digital_write(GPA2, LOW)
         GPIO_Expander.digital_write(GPA1, LOW)
         GPIO_Expander.digital_write(GPA0, LOW)
-    def select_gain(self, setting):
+        #Input
+        GPIO_Expander.digital_write(GPA5, LOW)
+        GPIO_Expander.digital_write(GPA4, LOW)
+        GPIO_Expander.digital_write(GPA3, LOW)
+
+    def select_calibration(self, setting):
+        if setting == '100' or setting == 100 or setting == 0:
+            GPIO_Expander.digital_write(GPB2, LOW)
+            GPIO_Expander.digital_write(GPB3, LOW)
+            GPIO_Expander.digital_write(GPB4, LOW)
+            GPIO_Expander.digital_write(GPB5, LOW)
+            GPIO_Expander.digital_write(GPB6, LOW)
+        elif setting == '1k' or setting == 1e3 or setting == 1:
+            GPIO_Expander.digital_write(GPB2, LOW)
+            GPIO_Expander.digital_write(GPB3, HIGH)
+            GPIO_Expander.digital_write(GPB4, LOW)
+            GPIO_Expander.digital_write(GPB5, LOW)
+            GPIO_Expander.digital_write(GPB6, LOW)
+        elif setting == '10k' or setting == 10e3 or setting == 2:
+            GPIO_Expander.digital_write(GPB2, HIGH)
+            GPIO_Expander.digital_write(GPB3, LOW)
+            GPIO_Expander.digital_write(GPB4, LOW)
+            GPIO_Expander.digital_write(GPB5, LOW)
+            GPIO_Expander.digital_write(GPB6, LOW)
+        elif setting == '50k' or setting == 50e3 or setting == 3:
+            GPIO_Expander.digital_write(GPB2, HIGH)
+            GPIO_Expander.digital_write(GPB3, LOW)
+            GPIO_Expander.digital_write(GPB4, HIGH)
+            GPIO_Expander.digital_write(GPB5, LOW)
+            GPIO_Expander.digital_write(GPB6, LOW)
+        elif setting == '100k' or setting == 100e3 or setting == 4:
+            GPIO_Expander.digital_write(GPB2, HIGH)
+            GPIO_Expander.digital_write(GPB3, HIGH)
+            GPIO_Expander.digital_write(GPB4, LOW)
+            GPIO_Expander.digital_write(GPB5, LOW)
+            GPIO_Expander.digital_write(GPB6, LOW)
+        elif setting == '500k' or setting == 500e3 or setting == 5:
+            GPIO_Expander.digital_write(GPB2, HIGH)
+            GPIO_Expander.digital_write(GPB3, HIGH)
+            GPIO_Expander.digital_write(GPB4, LOW)
+            GPIO_Expander.digital_write(GPB5, HIGH)
+            GPIO_Expander.digital_write(GPB6, LOW)
+        elif setting == '1Meg' or setting == 1e6 or setting == 6:
+            GPIO_Expander.digital_write(GPB2, HIGH)
+            GPIO_Expander.digital_write(GPB3, HIGH)
+            GPIO_Expander.digital_write(GPB4, HIGH)
+            GPIO_Expander.digital_write(GPB5, LOW)
+            GPIO_Expander.digital_write(GPB6, LOW)
+        elif setting == '10Meg' or setting == 1e6 or setting == 7:
+            GPIO_Expander.digital_write(GPB2, HIGH)
+            GPIO_Expander.digital_write(GPB3, HIGH)
+            GPIO_Expander.digital_write(GPB4, HIGH)
+            GPIO_Expander.digital_write(GPB5, LOW)
+            GPIO_Expander.digital_write(GPB6, HIGH)
+        elif setting == 'Randles' or setting == 8:
+            GPIO_Expander.digital_write(GPB2, HIGH)
+            GPIO_Expander.digital_write(GPB3, HIGH)
+            GPIO_Expander.digital_write(GPB4, HIGH)
+            GPIO_Expander.digital_write(GPB5, HIGH)
+            GPIO_Expander.digital_write(GPB6, LOW)
+        elif setting == 'Randles' or setting == 9:
+            GPIO_Expander.digital_write(GPB2, HIGH)
+            GPIO_Expander.digital_write(GPB3, HIGH)
+            GPIO_Expander.digital_write(GPB4, HIGH)
+            GPIO_Expander.digital_write(GPB5, HIGH)
+            GPIO_Expander.digital_write(GPB6, HIGH)
+
+    def select_output_gain(self, setting):
         if setting == '1x' or setting == 0:
             GPIO_Expander.digital_write(GPA2, HIGH)
             GPIO_Expander.digital_write(GPA1, HIGH)
@@ -179,37 +193,28 @@ class Output_Gain_Mux:
             GPIO_Expander.digital_write(GPA1, LOW)
             GPIO_Expander.digital_write(GPA0, LOW)
 
-class Input_Gain_Mux:
-#GPA5 = SSR0 = RI0
-#GPA4 = SSR1 = RI1
-#GPA3 = SSR2 = RI2
-
-#RI0 RI1 RI2
-#0 0 0 = 10
-#0 0 1 = 10
-#0 1 0 = 100
-#0 1 1 = 100
-#1 0 0 = 1k
-#1 0 1 = 10k
-#1 1 0 = 100k
-#1 1 1 = 1Meg
-
-    def __init__(self, GPIO_Expander, sensor):
-        pins = [24,23]  # 24 is A1, 23 is A0
-        GPIO.setmode(GPIO.BCM)
-        for pin in pins:
-            GPIO.setup(pin, GPIO.OUT)
-            GPIO.output(pin, GPIO.LOW)
-    def select_gain(self, setting):
-        if setting == '100x' or setting == 100 or setting == 0:
-            GPIO.output(24, GPIO.LOW)
-            GPIO.output(23, GPIO.LOW)
-        elif setting == '10kx' or setting == 10e3 or setting == 1:
-            GPIO.output(24, GPIO.LOW)
-            GPIO.output(23, GPIO.HIGH)
-        elif setting == '100kx' or setting == 100e3 or setting == 2:
-            GPIO.output(24, GPIO.HIGH)
-            GPIO.output(23, GPIO.LOW)
-        elif setting == '1Mx' or setting == 1e6 or setting == 3:
-            GPIO.output(24, GPIO.HIGH)
-            GPIO.output(23, GPIO.HIGH)
+    def select_input_gain(self, setting):
+        if setting == '10x' or setting == 10 or setting == 0:
+            GPIO_Expander.digital_write(GPA5, LOW)
+            GPIO_Expander.digital_write(GPA4, LOW)
+            GPIO_Expander.digital_write(GPA3, LOW)
+        elif setting == '100x' or setting == 100 or setting == 1:
+            GPIO_Expander.digital_write(GPA5, LOW)
+            GPIO_Expander.digital_write(GPA4, HIGH)
+            GPIO_Expander.digital_write(GPA3, LOW)
+        elif setting == '1kx' or setting == 1e3 or setting == 2:
+            GPIO_Expander.digital_write(GPA5, HIGH)
+            GPIO_Expander.digital_write(GPA4, LOW)
+            GPIO_Expander.digital_write(GPA3, LOW)
+        elif setting == '10kx' or setting == 10e3 or setting == 3:
+            GPIO_Expander.digital_write(GPA5, HIGH)
+            GPIO_Expander.digital_write(GPA4, LOW)
+            GPIO_Expander.digital_write(GPA3, HIGH)
+        elif setting == '100kx' or setting == 100e3 or setting == 4:
+            GPIO_Expander.digital_write(GPA5, HIGH)
+            GPIO_Expander.digital_write(GPA4, HIGH)
+            GPIO_Expander.digital_write(GPA3, LOW)
+        elif setting == '1Megx' or setting == 1e6 or setting == 4:
+            GPIO_Expander.digital_write(GPA5, HIGH)
+            GPIO_Expander.digital_write(GPA4, HIGH)
+            GPIO_Expander.digital_write(GPA3, HIGH)
