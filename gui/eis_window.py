@@ -91,7 +91,7 @@ class EISWindow:
         def __init__(self):
             self.sensor = AD5933()
             self.CLK = LTC6904()
-            self.Calibration_Mux = Relays()
+            self.relays= Relays()
     '''
     def Temporary_Test(self):
         self.hardware.Calibration_Mux.select_calibration('100k')
@@ -503,7 +503,7 @@ class EISWindow:
             export_to_usb(self.send_notification, self.freq_data, self.real_data, self.imag_data)
     
     def update_voltage(self, why):
-        set_output_amplitude(self.voltage.get(), self.hardware.sensor, self.hardware.Output_Gain_Mux, self.send_notification)
+        set_output_amplitude(self.voltage.get(), self.hardware.sensor, self.hardware.relays, self.send_notification)
 
     # Experiments
     def calibrate_experiment(self):

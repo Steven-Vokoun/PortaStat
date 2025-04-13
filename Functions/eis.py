@@ -100,37 +100,58 @@ def export_to_usb(send_notification, frequencies, real, imaginary):
     except Exception as e:
         send_notification(f"Failed to write to CSV: {e}")
 
-def set_output_amplitude(voltage, sensor, Output_Gain_Mux, send_notification):
+def set_output_amplitude(voltage, sensor, relays, send_notification):
     if voltage == "2mV" or voltage == '2' or voltage == 2:
         sensor.set_output_voltage(.2)
-        Output_Gain_Mux.select_gain('.01x')
+        relays.set_output_gain('.01x')
     elif voltage == "4mV" or voltage == '4' or voltage == 4:
         sensor.set_output_voltage(.4)
-        Output_Gain_Mux.select_gain('.01x')
+        relays.set_output_gain('.01x')
     elif voltage == "10mV" or voltage == '10' or voltage == 10:
-        sensor.set_output_voltage(1)
-        Output_Gain_Mux.select_gain('.01x')
+        sensor.set_output_voltage(.2)
+        relays.set_output_gain('.05x')
+    elif voltage == "10mV" or voltage == '10' or voltage == 10:
+        sensor.set_output_voltage(.2)
+        relays.set_output_gain('.05x')
     elif voltage == "20mV" or voltage == '20' or voltage == 20:
         sensor.set_output_voltage(.2)
-        Output_Gain_Mux.select_gain('.1x')
+        relays.set_output_gain('.1x')
     elif voltage == "38mV" or voltage == '38' or voltage == 38:
         sensor.set_output_voltage(.4)
-        Output_Gain_Mux.select_gain('.1x')
-    elif voltage == "100mV" or voltage == '100' or voltage == 100:
+        relays.set_output_gain('.1x')
+    elif voltage == "50mV" or voltage == '50' or voltage == 50:
         sensor.set_output_voltage(1)
-        Output_Gain_Mux.select_gain('.1x')
+        relays.set_output_gain('.05x')
+    elif voltage == "100mV" or voltage == '100' or voltage == 100:
+        sensor.set_output_voltage(.2)
+        relays.set_output_gain('.5x')
+    elif voltage == "150mV" or voltage == '150' or voltage == 150:
+        sensor.set_output_voltage(.2)
+        relays.set_output_gain('.75x')
     elif voltage == "200mV" or voltage == '200' or voltage == 200:
         sensor.set_output_voltage(.2)
-        Output_Gain_Mux.select_gain('1x')
-    elif voltage == "380mV" or voltage == '380' or voltage == 380:
+        relays.set_output_gain('1x')
+    elif voltage == "300mV" or voltage == '300' or voltage == 300:
         sensor.set_output_voltage(.4)
-        Output_Gain_Mux.select_gain('1x')
+        relays.set_output_gain('.75x')
+    elif voltage == "400mV" or voltage == '400' or voltage == 400:
+        sensor.set_output_voltage(.4)
+        relays.set_output_gain('1x')
+    elif voltage == "500mV" or voltage == '500' or voltage == 500:
+        sensor.set_output_voltage(1)
+        relays.set_output_gain('.5x')
+    elif voltage == "750mV" or voltage == '750' or voltage == 750:
+        sensor.set_output_voltage(1)
+        relays.set_output_gain('.75x')
     elif voltage == "1V" or voltage == '1000' or voltage == 1000:
         sensor.set_output_voltage(1)
-        Output_Gain_Mux.select_gain('1x')
+        relays.set_output_gain('1x')
+    elif voltage == "1.5V" or voltage == '1500' or voltage == 1500:
+        sensor.set_output_voltage(2)
+        relays.set_output_gain('.75x')
     elif voltage == "2V" or voltage == '2000' or voltage == 2000:
         sensor.set_output_voltage(2)
-        Output_Gain_Mux.select_gain('1x')
+        relays.set_output_gain('1x')
     else:
         send_notification("Invalid voltage value")
 
@@ -191,9 +212,6 @@ def find_phase_arctan(real, imag):
 
 def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, num_steps, spacing_type):
 
-    ##setup hardware
-    hardware.Electrode_Mux.select_electrode('2 Electrode')
-
     ## run
     send_notification('Calibrating...')
     send_notification(str(voltage))
@@ -205,7 +223,7 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
         
         estimated_current = (voltage/1000)/impedance
         estimated_gain = None
-        gains = [100, 10e3, 100e3, 1e6]
+        gains = [10, 100, 1e3, 10e3, 100e3, 1e6]
         for gain in gains:
             if estimated_current * gain * 5 < 1.5:  #~~VCC/2
                 estimated_gain = gain
@@ -353,7 +371,7 @@ def import_all_calibration_data(voltage):
 def find_gain_from_voltage_and_Impedance(voltage, estimated_impedance, send_notification):
     estimated_current = (voltage/1000)/estimated_impedance
     estimated_gain = None
-    gains = [100, 10e3, 100e3, 1e6]
+    gains = [10, 100, 1e3, 10e3, 100e3, 1e6]
     for gain in gains:
         if estimated_current * gain * 5 < 1.5:
             estimated_gain = gain
