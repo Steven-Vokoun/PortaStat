@@ -22,7 +22,7 @@ def run_demo_EIS_experiment(update_data_callback, max_freq, min_freq, spacing_ty
     
     Rs = 1000
     Rp = 100000
-    C = 5E-8
+    C = 5E-9
     
     real_impedances, imag_impedances = calculate_impedance(frequencies, Rs, Rp, C)
 
@@ -212,11 +212,11 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
     ## run
     send_notification('Calibrating...')
     send_notification(str(voltage))
-    set_output_amplitude(voltage, hardware.sensor, hardware.Output_Gain_Mux, send_notification)
+    set_output_amplitude(voltage, hardware.sensor, hardware.relays, send_notification)
 
     impedances = [10e6, 1e6, 100e3, 10e3, 100]
     for impedance in impedances:
-        hardware.Calibration_Mux.select_calibration(impedance)
+        hardware.relays.select_calibration(impedance)
         
         estimated_current = (voltage/1000)/impedance
         estimated_gain = None
@@ -228,7 +228,7 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
                 break
         if estimated_gain is None:
             send_notification("Unable to find suitable gain setting")
-        hardware.Input_Gain_Mux.select_gain(estimated_gain)
+        hardware.relays.set_input_gain(estimated_gain)
 
         
         freqs, GainFactors, Sys_Phases = hardware.sensor.Calibration_Sweep(impedance, start_freq, end_freq, num_steps, hardware, spacing_type)
@@ -239,21 +239,17 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
         send_notification(impedance, newline=False)
     send_notification("Calibration complete")
 
-def conduct_experiment(hardware, send_notification, voltage, estimated_impedance, start_freq, end_freq, num_steps = 100, spacing_type='logarithmic', output_location = 'Counter0', binary_search = True):
+def conduct_experiment(hardware, send_notification, voltage, estimated_impedance, start_freq, end_freq, num_steps = 100, spacing_type='logarithmic', output_location = 'Counter', binary_search = True):
     
     send_notification("Running EIS experiment...")
 
-    ## setup hardware
-    hardware.Electrode_Mux.select_electrode('2 Electrode')
-
     #Set Calibration
-    hardware.Calibration_Mux.select_calibration(output_location)
+    hardware.relays.select_calibration(output_location)
 
     #Set Output
-    set_output_amplitude(voltage, hardware.sensor, hardware.Output_Gain_Mux, send_notification)
-
+    set_output_amplitude(voltage, hardware.sensor, hardware.relays, send_notification)
     #Set Gain
-    impedance_values = {0: '100', 1: '10000', 2: '100000', 3: '1000000', 4: '10000000'}
+    impedance_values = {0: '10', 1: '100', 2: '1000', 3: '10000', 4: '100000', 5: '1000000'}
     estimated_impedance = int(impedance_values[estimated_impedance])
 
     if binary_search == True:
@@ -261,7 +257,7 @@ def conduct_experiment(hardware, send_notification, voltage, estimated_impedance
         
     else:
         estimated_gain = find_gain_from_voltage_and_Impedance(voltage, estimated_impedance, send_notification)
-        hardware.Input_Gain_Mux.select_gain(estimated_gain)
+        hardware.relays.set_input_gain(estimated_gain)
         #Run Experiment
         freqs, real, imag = hardware.sensor.Complete_Sweep(start_freq, end_freq, num_steps, hardware, spacing_type)
 
@@ -281,7 +277,7 @@ def binary_search_gain(hardware, send_notification, voltage, estimated_impedance
     for trial in range(3):
         # Setup starting parameters
         estimated_gain = find_gain_from_voltage_and_Impedance(voltage, estimated_impedance, send_notification)
-        hardware.Input_Gain_Mux.select_gain(estimated_gain)
+        hardware.relays.set_input_gain(estimated_gain)
         real_temp, imag_temp = hardware.sensor.run_freq_sweep(freq)
     
         # Adjust the impedance with the calibration factor
@@ -383,7 +379,7 @@ def find_gain_from_voltage_and_Impedance(voltage, estimated_impedance, send_noti
 
 def find_impedance_from_voltage_and_gain(voltage, gain, send_notification):
     estimate = (voltage / 1000) * gain * 5 / 1.5
-    impedances = [100, 10e3, 100e3, 1e6, 10e6]
+    impedances = [10, 100, 1e3, 10e3, 100e3, 1e6]
     estimated_impedance = None
     
     for impedance in impedances:
@@ -393,8 +389,8 @@ def find_impedance_from_voltage_and_gain(voltage, gain, send_notification):
             estimated_impedance = impedance
     
     if estimated_impedance is None:
-        send_notification("Unable to find suitable impedance setting, Defaulting to 100k")
-        return int(100e3)
+        send_notification("Unable to find suitable impedance setting, Defaulting to 10k")
+        return int(10e3)
     else:
         send_notification(f"Estimated impedance setting: {estimated_impedance}")
         return int(estimated_impedance)

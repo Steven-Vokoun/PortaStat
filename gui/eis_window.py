@@ -78,9 +78,7 @@ class EISWindow:
                         'send_cmd': lambda x: None,
                         'set_output_voltage': lambda x: None
                     })()
-                    self.Calibration_Mux = type('DummyMux', (), {'select_calibration': lambda x: None})()
-                    self.Output_Gain_Mux = type('DummyMux', (), {'select_gain': lambda x: None})()
-                    self.Input_Gain_Mux = type('DummyMux', (), {'select_gain': lambda x: None})()
+                    self.relays = type('DummyMux', (), {'select_calibration': lambda x: None})()
                     self.CLK = type('DummyCLK', (), {'Turn_On_Clock': lambda x: None})()
             
             self.hardware = DummyHardware()
@@ -278,7 +276,7 @@ class EISWindow:
         self.impedance_frame.pack(fill=ctk.X, pady=2)
         self.impedance_label = ctk.CTkLabel(self.impedance_frame, text="Estimated Impedance:", font=("Helvetica", 12))
         self.impedance_label.pack(side=ctk.LEFT, padx=5)
-        self.impedance_slider = ctk.CTkSlider(self.impedance_frame, from_=0, to=4, command=self.update_impedance_label)
+        self.impedance_slider = ctk.CTkSlider(self.impedance_frame, from_=0, to=5, command=self.update_impedance_label)
         self.impedance_slider.set(0)
         self.impedance_slider.pack(side=ctk.LEFT, padx=5, fill=ctk.X, expand=True)
         self.impedance_value_label = ctk.CTkLabel(self.impedance_frame, text='100', width=50)
