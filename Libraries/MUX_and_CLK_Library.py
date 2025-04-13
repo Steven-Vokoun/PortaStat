@@ -18,7 +18,12 @@ GPB4 = 12
 GPB5 = 13
 GPB6 = 14
 GPB7 = 15
-ALL_GPIO = [GPA0, GPA1, GPA2, GPA3, GPA4, GPA5, GPA6, GPA7, GPB0, GPB1, GPB2, GPB3, GPB4, GPB5, GPB6, GPB7]
+ALL_GPIO = {
+    "Cal Board": [GPB2, GPB3, GPB4, GPB5, GPB6],
+    "Output": [GPA2, GPA1, GPA0],
+    "Input": [GPA5, GPA4, GPA3],
+    "Other": [GPA6, GPA7, GPB0, GPB1, GPB7]
+}
 
 HIGH = 0xFF
 LOW = 0x00
@@ -112,20 +117,9 @@ CAL0 CAL1 CAL2 CAL3 CAL4
 class Relays:
     def __init__(self):
         self.mcp = MCP23017()
-        #Cal Board
-        self.mcp.digital_write(GPB2, LOW)
-        self.mcp.digital_write(GPB3, LOW)
-        self.mcp.digital_write(GPB4, LOW)
-        self.mcp.digital_write(GPB5, LOW)
-        self.mcp.digital_write(GPB6, LOW)
-        #Output
-        self.mcp.digital_write(GPA2, LOW)
-        self.mcp.digital_write(GPA1, LOW)
-        self.mcp.digital_write(GPA0, LOW)
-        #Input
-        self.mcp.digital_write(GPA5, LOW)
-        self.mcp.digital_write(GPA4, LOW)
-        self.mcp.digital_write(GPA3, LOW)
+        # init relevant pins LOW
+        for pin in zip(ALL_GPIO["Cal Board"], ALL_GPIO["Output"], ALL_GPIO["Input"]):
+            self.mcp.digital_write(pin, LOW)
 
     def select_calibration(self, setting):
         if setting == '100' or setting == 100 or setting == 0:
@@ -236,7 +230,7 @@ class Relays:
             self.mcp.digital_write(GPA5, HIGH)
             self.mcp.digital_write(GPA4, HIGH)
             self.mcp.digital_write(GPA3, LOW)
-        elif setting == '1Megx' or setting == 1e6 or setting == 4:
+        elif setting == '1Megx' or setting == 1e6 or setting == 5:
             self.mcp.digital_write(GPA5, HIGH)
             self.mcp.digital_write(GPA4, HIGH)
             self.mcp.digital_write(GPA3, HIGH)
