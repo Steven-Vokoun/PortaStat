@@ -50,18 +50,7 @@ class EISWindow:
     def setup_hardware(self):
         """Sets up hardware or dummy hardware for Windows"""
         if os.name == 'nt':
-            # Create dummy hardware for Windows testing
-            class DummyHardware:
-                def __init__(self):
-                    self.sensor = type('DummySensor', (), {
-                        'measure_temperature': lambda: 25,
-                        'send_cmd': lambda x: None,
-                        'set_output_voltage': lambda x: None
-                    })()
-                    self.relays = type('DummyMux', (), {'select_calibration': lambda x: None})()
-                    self.CLK = type('DummyCLK', (), {'Turn_On_Clock': lambda x: None})()
-            
-            self.hardware = DummyHardware()
+            self.hardware = self.HardwareComponents(dummy=True)
         else:
             self.hardware = self.HardwareComponents(dummy=False)
 
@@ -77,7 +66,8 @@ class EISWindow:
                         })()
             self.relays= Relays() if not dummy else type('DummyRelay', (), {
                             'select_gain': lambda x: None,
-                            'set_output_gain': lambda x,y: None
+                            'set_output_gain': lambda x,y: None,
+                            'select_calibration': lambda x,y: None
                         })()
     '''
     def Temporary_Test(self):
@@ -119,8 +109,8 @@ class EISWindow:
         self.status_frame.pack(side=ctk.RIGHT, padx=10)
 
         # Temperature display
-        temp_icon = ctk.CTkLabel(self.status_frame, text="🌡️", font=("Helvetica", 14))
-        temp_icon.pack(side=ctk.LEFT, padx=(5,0))
+        temp_icon = ctk.CTkLabel(self.status_frame, text=None, image=self.emoji("🌡️", offset=9))
+        temp_icon.pack(side=ctk.LEFT, padx=(10,0))
 
         self.Temperature_Widget = ctk.CTkLabel(
             self.status_frame,
@@ -134,7 +124,7 @@ class EISWindow:
         separator.pack(side=ctk.LEFT, padx=5)
 
         # Battery display
-        self.battery_icon = ctk.CTkLabel(self.status_frame, text="🔋", font=("Helvetica", 14))
+        self.battery_icon = ctk.CTkLabel(self.status_frame, text=None, image=self.emoji("🔋"))
         self.battery_icon.pack(side=ctk.LEFT, padx=(5,0))
 
         self.battery_widget = ctk.CTkLabel(
@@ -164,9 +154,9 @@ class EISWindow:
         if battery_level >= 0:
             # Update icon based on battery level
             if battery_level <= 20:
-                self.battery_icon.configure(text="🪫")  # Low battery icon
+                self.battery_icon.configure(image=self.emoji("🪫"))  # Low battery icon
             else:
-                self.battery_icon.configure(text="🔋")  # Normal battery icon
+                self.battery_icon.configure(image=self.emoji("🔋"))  # Normal battery icon
 
             self.battery_widget.configure(text=f"{battery_level}%")
         else:
@@ -515,3 +505,22 @@ class EISWindow:
         self.clear_frame(self.button_frame)
         self.clear_frame(self.plot_frame)
         self.Temperature_Widget.destroy()
+
+    def emoji(self, emoji, offset=0, size=32):
+        """
+        Function to help display emojis in Tkinter by conversion to imgs.
+
+        Same as linked code, except with offset to allow for display of thermometer emoji.
+        https://stackoverflow.com/questions/66183690/how-to-display-colored-emojis-in-tkinter
+        """
+        from customtkinter import CTkButton as Btn, CTkImage, CTk
+        from PIL import Image, ImageDraw, ImageFont
+        # convert emoji to CTkImage
+        font = ImageFont.truetype("seguiemj.ttf", size=int(size/1.5))
+        img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.text((size/2 + offset, size/2), emoji,
+                embedded_color=True, font=font, anchor="mm")
+        img = CTkImage(img, size=(size, size))
+        return img
+    
