@@ -15,21 +15,8 @@ class EISWindow:
         self.controls_frame = controls_frame
         self.button_frame = button_frame
         self.toolbar_frame = toolbar_frame
-        self.root = toolbar_frame.winfo_toplevel()  # Get the root window
+        self.root = toolbar_frame.winfo_toplevel()
 
-        # Initialize hardware first
-        self.setup_hardware()
-
-        # Configure grid weights for better layout
-        self.plot_frame.grid_columnconfigure(0, weight=3)
-        self.controls_frame.grid_columnconfigure(0, weight=1)
-
-        # Configure frame grid with padding
-        self.plot_frame.grid(padx=10, pady=10)
-        self.controls_frame.grid(padx=10, pady=10)
-        self.button_frame.grid(padx=10, pady=5)
-
-        # Initialize variables
         self.spacing_type = ctk.StringVar(value="logarithmic")
         self.circuit_type = ctk.StringVar(value="Series RC")
         self.voltage = ctk.IntVar(value=1000)
@@ -44,54 +31,43 @@ class EISWindow:
         self.real_fit_data = None
         self.imag_fit_data = None
 
-        # Setup UI components
         self.setup_ui()
+        self.setup_hardware()
         self.show_temp()
 
     def setup_ui(self):
-        # Create main sections with titles
-        self.create_section_label(self.controls_frame, "Experiment Settings", 0)
+        # Experiment settings
         self.setup_calibrate_and_voltage()
         self.setup_freq_and_spacing()
-
-        self.create_section_label(self.controls_frame, "Analysis Settings", 4)
+        #Analysis settings
         self.setup_circuit_and_fitting()
-
-        self.create_section_label(self.controls_frame, "Experiment Control", 7)
+        #Experiment control
         self.setup_step_size_and_start()
-
-        self.create_section_label(self.controls_frame, "Results", 9)
+        #Results
         self.setup_plot_and_params()
         self.setup_export_and_notification()
 
-    def create_section_label(self, parent, text, row):
-        label = ctk.CTkLabel(parent, text=text, font=("Helvetica", 14, "bold"))
-        label.grid(row=row, column=0, pady=(15, 5), sticky="w")
-
     def setup_hardware(self):
+        """Sets up hardware or dummy hardware for Windows"""
         if os.name == 'nt':
-            # Create dummy hardware for Windows testing
-            class DummyHardware:
-                def __init__(self):
-                    self.sensor = type('DummySensor', (), {
-                        'measure_temperature': lambda: 25,
-                        'send_cmd': lambda x: None,
-                        'set_output_voltage': lambda x: None
-                    })()
-                    self.Calibration_Mux = type('DummyMux', (), {'select_calibration': lambda x: None})()
-                    self.Output_Gain_Mux = type('DummyMux', (), {'select_gain': lambda x: None})()
-                    self.Input_Gain_Mux = type('DummyMux', (), {'select_gain': lambda x: None})()
-                    self.CLK = type('DummyCLK', (), {'Turn_On_Clock': lambda x: None})()
-
-            self.hardware = DummyHardware()
+            self.hardware = self.HardwareComponents(dummy=True)
         else:
-            self.hardware = self.HardwareComponents()
+            self.hardware = self.HardwareComponents(dummy=False)
 
     class HardwareComponents:
-        def __init__(self):
-            self.sensor = AD5933()
-            self.CLK = LTC6904()
-            self.relays= Relays()
+        def __init__(self, dummy):
+            self.sensor = AD5933() if not dummy else type('DummySensor', (), {
+                            'measure_temperature': lambda: 25,
+                            'send_cmd': lambda x: None,
+                            'set_output_voltage': lambda x,y: None
+                        })()
+            self.CLK = LTC6904() if not dummy else type('DummyCLK', (), {
+                            'Turn_On_Clock': lambda x: None
+                        })()
+            self.relays= Relays() if not dummy else type('DummyRelay', (), {
+                            'select_gain': lambda x: None,
+                            'set_output_gain': lambda x,y: None
+                        })()
     '''
     def Temporary_Test(self):
         self.hardware.Calibration_Mux.select_calibration('100k')
@@ -190,71 +166,46 @@ class EISWindow:
 
     def setup_plot(self):
         matplotlib.rcParams['font.size'] = 10
-        matplotlib.rcParams['figure.facecolor'] = '#2b2b2b'
-        matplotlib.rcParams['axes.facecolor'] = '#2b2b2b'
-        matplotlib.rcParams['axes.edgecolor'] = '#ffffff'
-        matplotlib.rcParams['axes.labelcolor'] = '#ffffff'
-        matplotlib.rcParams['xtick.color'] = '#ffffff'
-        matplotlib.rcParams['ytick.color'] = '#ffffff'
-
-        self.figure, self.ax = plt.subplots(figsize=(8, 6))
-        self.figure.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.15)
+        self.figure, self.ax = plt.subplots(figsize=(4, 3))
+        self.figure.subplots_adjust(left=0.2)
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.plot_frame)
-        self.canvas.get_tk_widget().pack(fill=ctk.BOTH, expand=True, padx=10, pady=10)
+        self.canvas.get_tk_widget().pack(fill=ctk.BOTH, expand=True)
 
     def setup_calibrate_and_voltage(self):
         self.calibrate_voltage_frame = ctk.CTkFrame(self.controls_frame)
-        self.calibrate_voltage_frame.grid(row=1, column=0, pady=(0, 10), padx=5, sticky="ew")
+        self.calibrate_voltage_frame.pack(pady=3, padx=5, anchor="n", fill=ctk.X)
 
-        self.calibrate_button = ctk.CTkButton(
-            self.calibrate_voltage_frame, 
-            text="Calibrate EIS",
-            command=self.calibrate_experiment,
-            font=("Helvetica", 12)
-        )
-        self.calibrate_button.pack(side=ctk.LEFT, pady=3, padx=5)
+        self.calibrate_button = ctk.CTkButton(self.calibrate_voltage_frame, text="Calibrate EIS", command=self.calibrate_experiment)
+        self.calibrate_button.pack(side=ctk.LEFT, pady=3, padx=1)
 
-        self.voltage_label = ctk.CTkLabel(self.calibrate_voltage_frame, text="Voltage (mV):", font=("Helvetica", 12))
+        self.voltage_label = ctk.CTkLabel(self.calibrate_voltage_frame, text="Voltage (mV): ")
         self.voltage_label.pack(side=ctk.LEFT, padx=5)
-        
         voltage_values = ["2", "4", "10", "20", "40", "50", "100", "150", "200", "300", "400", "500", "750", "1000", "1500", "2000"]
-        self.voltage_dropdown = ctk.CTkComboBox(
-            self.calibrate_voltage_frame,
-            variable=self.voltage,
-            values=voltage_values,
-            command=self.update_voltage,
-            font=("Helvetica", 12)
-        )
-        self.voltage_dropdown.pack(side=ctk.LEFT, padx=5)
+        self.voltage_dropdown = ctk.CTkComboBox(self.calibrate_voltage_frame, variable=self.voltage, values=voltage_values, command=self.update_voltage)
+        self.voltage_dropdown.pack(side=ctk.LEFT, padx=1)
 
         #self.Temporary_Test_Button = ctk.CTkButton(self.calibrate_voltage_frame, text="Temporary Test", command=self.Temporary_Test)
         #self.Temporary_Test_Button.pack(side=ctk.LEFT, pady=3, padx=10)
 
     def setup_freq_and_spacing(self):
         self.freq_frame = ctk.CTkFrame(self.controls_frame)
-        self.freq_frame.grid(row=2, column=0, pady=(0, 10), padx=5, sticky="ew")
+        self.freq_frame.pack(pady=3, padx=5, anchor="n", fill=ctk.X)
 
-        # Min Frequency with improved styling
-        self.min_freq_frame = ctk.CTkFrame(self.freq_frame)
-        self.min_freq_frame.pack(fill=ctk.X, pady=2)
-        self.min_freq_label = ctk.CTkLabel(self.min_freq_frame, text="Min Frequency:", font=("Helvetica", 12))
+        # Min Frequency
+        self.min_freq_frame = ctk.CTkFrame(self.freq_frame, width=300)
+        self.min_freq_frame.pack(fill=ctk.X)
+        self.min_freq_label = ctk.CTkLabel(self.min_freq_frame, text="Min Frequency:")
         self.min_freq_label.pack(side=ctk.LEFT, padx=5)
-        self.min_freq_slider = ctk.CTkSlider(
-            self.min_freq_frame,
-            from_=10,
-            to=20000,
-            command=self.update_min_freq_label,
-            number_of_steps=100
-        )
+        self.min_freq_slider = ctk.CTkSlider(self.min_freq_frame, from_=10, to=20000, command=self.update_min_freq_label)
         self.min_freq_slider.set(1000)
         self.min_freq_slider.pack(side=ctk.LEFT, padx=5, fill=ctk.X, expand=True)
         self.min_freq_value_label = ctk.CTkLabel(self.min_freq_frame, text=f"{self.min_freq_slider.get()}", width=50)
         self.min_freq_value_label.pack(side=ctk.LEFT, padx=2)
 
         # Max Frequency
-        self.max_freq_frame = ctk.CTkFrame(self.freq_frame)
-        self.max_freq_frame.pack(fill=ctk.X, pady=2)
-        self.max_freq_label = ctk.CTkLabel(self.max_freq_frame, text="Max Frequency:", font=("Helvetica", 12))
+        self.max_freq_frame = ctk.CTkFrame(self.freq_frame, width=300)
+        self.max_freq_frame.pack(fill=ctk.X)
+        self.max_freq_label = ctk.CTkLabel(self.max_freq_frame, text="Max Frequency:")
         self.max_freq_label.pack(side=ctk.LEFT, padx=5)
         self.max_freq_slider = ctk.CTkSlider(self.max_freq_frame, from_=50000, to=200000, command=self.update_max_freq_label)
         self.max_freq_slider.set(100000)
@@ -263,9 +214,9 @@ class EISWindow:
         self.max_freq_value_label.pack(side=ctk.LEFT, padx=2)
 
         # Step Size
-        self.step_size_frame = ctk.CTkFrame(self.freq_frame)
-        self.step_size_frame.pack(fill=ctk.X, pady=2)
-        self.step_size_label = ctk.CTkLabel(self.step_size_frame, text="Number Of Steps:", font=("Helvetica", 12))
+        self.step_size_frame = ctk.CTkFrame(self.freq_frame, width=300)
+        self.step_size_frame.pack(fill=ctk.X)
+        self.step_size_label = ctk.CTkLabel(self.step_size_frame, text="Number Of Steps:")
         self.step_size_label.pack(side=ctk.LEFT, padx=5)
         self.step_size_slider = ctk.CTkSlider(self.step_size_frame, from_=1, to=2000, command=self.update_step_size_label)
         self.step_size_slider.set(100)
@@ -274,39 +225,24 @@ class EISWindow:
         self.step_size_value_label.pack(side=ctk.LEFT, padx=2)
 
         # Estimated Impedance
-        self.impedance_frame = ctk.CTkFrame(self.freq_frame)
-        self.impedance_frame.pack(fill=ctk.X, pady=2)
-        self.impedance_label = ctk.CTkLabel(self.impedance_frame, text="Estimated Impedance:", font=("Helvetica", 12))
+        self.impedance_frame = ctk.CTkFrame(self.freq_frame, width=300)
+        self.impedance_frame.pack(fill=ctk.X)
+        self.impedance_label = ctk.CTkLabel(self.impedance_frame, text="Estimated Impedance:")
         self.impedance_label.pack(side=ctk.LEFT, padx=5)
         self.impedance_slider = ctk.CTkSlider(self.impedance_frame, from_=0, to=4, command=self.update_impedance_label)
         self.impedance_slider.set(0)
         self.impedance_slider.pack(side=ctk.LEFT, padx=5, fill=ctk.X, expand=True)
         self.impedance_value_label = ctk.CTkLabel(self.impedance_frame, text='100', width=50)
         self.impedance_value_label.pack(side=ctk.LEFT, padx=2)
-
+        
         # Spacing Type
         self.spacing_type_frame = ctk.CTkFrame(self.controls_frame)
-        self.spacing_type_frame.grid(row=3, column=0, pady=(0, 10), padx=5, sticky="ew")
+        self.spacing_type_frame.pack(pady=5, padx=10, anchor="n", fill=ctk.X)
 
-        spacing_type_label = ctk.CTkLabel(self.spacing_type_frame, text="Frequency Spacing:", font=("Helvetica", 12))
-        spacing_type_label.pack(side=ctk.LEFT, padx=10)
-
-        self.logarithmic_radio = ctk.CTkRadioButton(
-            self.spacing_type_frame,
-            text="Logarithmic",
-            variable=self.spacing_type,
-            value="logarithmic",
-            font=("Helvetica", 12)
-        )
+        self.logarithmic_radio = ctk.CTkRadioButton(self.spacing_type_frame, text="Logarithmic Spacing", variable=self.spacing_type, value="logarithmic")
         self.logarithmic_radio.pack(side=ctk.LEFT, padx=10)
 
-        self.linear_radio = ctk.CTkRadioButton(
-            self.spacing_type_frame,
-            text="Linear",
-            variable=self.spacing_type,
-            value="linear",
-            font=("Helvetica", 12)
-        )
+        self.linear_radio = ctk.CTkRadioButton(self.spacing_type_frame, text="Linear Spacing", variable=self.spacing_type, value="linear")
         self.linear_radio.pack(side=ctk.LEFT, padx=10)
 
     def update_min_freq_label(self, value):
@@ -332,167 +268,71 @@ class EISWindow:
 
     def setup_step_size_and_start(self):
         self.start_fitting_frame = ctk.CTkFrame(self.controls_frame)
-        self.start_fitting_frame.grid(row=8, column=0, pady=(0, 10), padx=5, sticky="ew")
+        self.start_fitting_frame.pack(pady=3, padx=10, anchor="n", fill=ctk.X)
 
-        # Create a frame for experiment settings
-        settings_frame = ctk.CTkFrame(self.start_fitting_frame)
-        settings_frame.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True, padx=5, pady=3)
+        self.start_button = ctk.CTkButton(self.start_fitting_frame, text="Start EIS", command=self.start_experiment)
+        self.start_button.pack(side=ctk.LEFT, pady=3, padx=3, fill=ctk.X)
 
-        # Output location selection
-        output_frame = ctk.CTkFrame(settings_frame)
-        output_frame.pack(fill=ctk.X, padx=5, pady=2)
-
-        output_label = ctk.CTkLabel(output_frame, text="Output Location:", font=("Helvetica", 12))
-        output_label.pack(side=ctk.LEFT, padx=5)
-        
         locations = ['Counter', 'Randles', '100', '1k', '10k', '50k', '100k', '500k', '1Meg', '10Meg']
-        self.output_location_dropdown = ctk.CTkComboBox(
-            output_frame,
-            variable=self.output_location,
-            values=locations,
-            font=("Helvetica", 12),
-            width=120
-        )
-        self.output_location_dropdown.pack(side=ctk.LEFT, padx=5)
+        self.output_location_dropdown = ctk.CTkComboBox(self.start_fitting_frame, variable=self.output_location, values=locations)
+        self.output_location_dropdown.pack(side=ctk.LEFT, pady=3, padx=3, fill=ctk.X)
 
-        # Auto gain checkbox
-        gain_frame = ctk.CTkFrame(settings_frame)
-        gain_frame.pack(fill=ctk.X, padx=5, pady=2)
-
-        self.binary_search_checkbox = ctk.CTkCheckBox(
-            gain_frame,
-            variable=self.binary_search,
-            text="Auto Gain",
-            font=("Helvetica", 12)
-        )
-        self.binary_search_checkbox.pack(side=ctk.LEFT, padx=5)
-
-        # Start button with progress indicator
-        button_frame = ctk.CTkFrame(self.start_fitting_frame)
-        button_frame.pack(side=ctk.RIGHT, fill=ctk.Y, padx=5, pady=3)
-
-        self.start_button = ctk.CTkButton(
-            button_frame,
-            text="Start EIS",
-            command=self.start_experiment,
-            font=("Helvetica", 12, "bold"),
-            width=120,
-            height=50
-        )
-        self.start_button.pack(pady=3)
+        self.binary_search_checkbox = ctk.CTkCheckBox(self.start_fitting_frame, variable = self.binary_search, text="Auto Gain")
+        self.binary_search_checkbox.pack(side=ctk.LEFT, pady=3, padx=3)
 
     def setup_circuit_and_fitting(self):
         self.circuit_type_frame = ctk.CTkFrame(self.controls_frame)
-        self.circuit_type_frame.grid(row=5, column=0, pady=(0, 10), padx=5, sticky="ew")
+        self.circuit_type_frame.pack(pady=3, padx=5, anchor="n", fill=ctk.X)
 
         self.left_frame = ctk.CTkFrame(self.circuit_type_frame)
         self.left_frame.pack(side=ctk.LEFT, pady=3, padx=5)
 
-        circuit_label = ctk.CTkLabel(self.left_frame, text="Circuit Model:", font=("Helvetica", 12))
-        circuit_label.pack(pady=(3,0), padx=5)
-
-        self.circuit_type_dropdown = ctk.CTkComboBox(
-            self.left_frame,
-            variable=self.circuit_type,
-            values=["Series RC", "Parallel RC", "Randles", "Randles With CPE"],
-            font=("Helvetica", 12)
-        )
-        self.circuit_type_dropdown.pack(pady=3, padx=5)
-
-        self.run_fitting_button = ctk.CTkButton(
-            self.left_frame,
-            text="Run Fitting",
-            command=self.run_fitting,
-            font=("Helvetica", 12)
-        )
+        self.run_fitting_button = ctk.CTkButton(self.left_frame, text="Run Fitting", command=self.run_fitting)
         self.run_fitting_button.pack(pady=3, padx=5, fill=ctk.X)
 
-        # Parameters display with title
-        params_frame = ctk.CTkFrame(self.circuit_type_frame)
-        params_frame.pack(side=ctk.LEFT, pady=2, padx=5, fill=ctk.BOTH, expand=True)
+        self.circuit_type_dropdown = ctk.CTkComboBox(self.left_frame, variable=self.circuit_type, values=["Series RC", "Parallel RC", "Randles", "Randles With CPE"])
+        self.circuit_type_dropdown.pack(pady=3, padx=5)
 
-        params_label = ctk.CTkLabel(params_frame, text="Fitted Parameters:", font=("Helvetica", 12))
-        params_label.pack(pady=(3,0), padx=5)
+        self.params_display = ctk.CTkTextbox(self.circuit_type_frame, height=80, width=250)
+        self.params_display.pack(side=ctk.LEFT, pady=2, padx=5)
 
-        self.params_display = ctk.CTkTextbox(params_frame, height=80, width=250)
-        self.params_display.pack(pady=(0,3), padx=5, fill=ctk.BOTH, expand=True)
-        self.params_display.configure(state="disabled")
 
     def setup_plot_and_params(self):
         self.plot_type = ctk.StringVar(value="mag_vs_freq")
 
-        # Create a frame for plot controls with a title
-        plot_controls_frame = ctk.CTkFrame(self.button_frame)
-        plot_controls_frame.pack(fill=ctk.X, padx=10, pady=5)
+        self.freq_mag_button = ctk.CTkRadioButton(self.button_frame, text="Magnitude vs Frequency", variable=self.plot_type, value="mag_vs_freq", command=self.update_plot)
+        self.freq_mag_button.pack(side=ctk.LEFT, padx=5)
 
-        plot_label = ctk.CTkLabel(plot_controls_frame, text="Plot Type:", font=("Helvetica", 12, "bold"))
-        plot_label.pack(side=ctk.LEFT, padx=(10,20))
+        self.freq_phase_button = ctk.CTkRadioButton(self.button_frame, text="Phase vs Frequency", variable=self.plot_type, value="phase_vs_freq", command=self.update_plot)
+        self.freq_phase_button.pack(side=ctk.LEFT, padx=5)
 
-        # Organize radio buttons in a more compact way
-        radio_buttons = [
-            ("Magnitude vs Frequency", "mag_vs_freq"),
-            ("Phase vs Frequency", "phase_vs_freq"),
-            ("Imaginary vs Real", "imag_vs_real"),
-            ("Real vs Frequency", "real_vs_freq"),
-            ("Imaginary vs Frequency", "imag_vs_freq")
-        ]
+        self.real_imag_button = ctk.CTkRadioButton(self.button_frame, text="Imaginary vs Real", variable=self.plot_type, value="imag_vs_real", command=self.update_plot)
+        self.real_imag_button.pack(side=ctk.LEFT, padx=5)
 
-        for text, value in radio_buttons:
-            btn = ctk.CTkRadioButton(
-                plot_controls_frame,
-                text=text,
-                variable=self.plot_type,
-                value=value,
-                command=self.update_plot,
-                font=("Helvetica", 12)
-            )
-            btn.pack(side=ctk.LEFT, padx=10)
+        self.real_freq_button = ctk.CTkRadioButton(self.button_frame, text="Real vs Frequency", variable=self.plot_type, value="real_vs_freq", command=self.update_plot)
+        self.real_freq_button.pack(side=ctk.LEFT, padx=5)
+
+        self.imag_freq_button = ctk.CTkRadioButton(self.button_frame, text="Imaginary vs Frequency", variable=self.plot_type, value="imag_vs_freq", command=self.update_plot)
+        self.imag_freq_button.pack(side=ctk.LEFT, padx=5)
 
         self.setup_plot()
 
     def setup_export_and_notification(self):
         self.export_frame = ctk.CTkFrame(self.controls_frame)
-        self.export_frame.grid(row=10, column=0, pady=(0, 10), padx=5, sticky="ew")
+        self.export_frame.pack(pady=3, padx=5, anchor="n", fill=ctk.X)
 
-        # Export controls
-        export_controls = ctk.CTkFrame(self.export_frame)
-        export_controls.pack(side=ctk.LEFT, pady=3, padx=5, fill=ctk.Y)
+        self.export_button = ctk.CTkButton(self.export_frame, text="Export Data", command=self.export_data)
+        self.export_button.pack(side=ctk.LEFT, pady=3, padx=5)
 
-        self.export_button = ctk.CTkButton(
-            export_controls,
-            text="Export Data",
-            command=self.export_data,
-            font=("Helvetica", 12)
-        )
-        self.export_button.pack(pady=3, padx=5)
-
-        # Notification area with title
-        notification_frame = ctk.CTkFrame(self.export_frame)
-        notification_frame.pack(side=ctk.LEFT, pady=3, padx=5, fill=ctk.BOTH, expand=True)
-
-        notification_label = ctk.CTkLabel(notification_frame, text="Status Messages:", font=("Helvetica", 12))
-        notification_label.pack(pady=(3,0), padx=5, anchor="w")
-
-        self.notification_box = ctk.CTkTextbox(notification_frame, height=80, width=275)
-        self.notification_box.pack(pady=(0,3), padx=5, fill=ctk.BOTH, expand=True)
+        self.notification_box = ctk.CTkTextbox(self.export_frame, height=10, width=275)
+        self.notification_box.pack(side=ctk.LEFT, padx=2)
         self.notification_box.insert(ctk.END, "Welcome! Please calibrate your device.")
-        self.notification_box.configure(state="disabled")
 
     def send_notification(self, message, newline=True):
         if newline:
             message = "\n" + message
-        self.notification_box.configure(state="normal")
         self.notification_box.insert(ctk.END, message)
         self.notification_box.see(ctk.END)
-        self.notification_box.configure(state="disabled")
-
-        # Automatically clear old messages if too many
-        content = self.notification_box.get("1.0", ctk.END)
-        lines = content.split('\n')
-        if len(lines) > 10:  # Keep only last 10 messages
-            self.notification_box.configure(state="normal")
-            self.notification_box.delete("1.0", f"{len(lines)-10}.0")
-            self.notification_box.configure(state="disabled")
 
     # External Calls
     def export_data(self):
@@ -583,17 +423,6 @@ class EISWindow:
 
     def update_plot(self):
         plot_type = self.plot_type.get()
-
-        # Clear previous plot
-        self.ax.clear()
-
-        if not hasattr(self, 'freq_data') or self.freq_data is None:
-            self.ax.text(0.5, 0.5, 'No data available\nRun an experiment first',
-                        ha='center', va='center', transform=self.ax.transAxes,
-                        color='white', fontsize=12)
-            self.canvas.draw()
-            return
-
         if plot_type == "mag_vs_freq":
             self.plot_freq_vs_mag()
         elif plot_type == "phase_vs_freq":
@@ -674,5 +503,4 @@ class EISWindow:
         self.clear_frame(self.controls_frame)
         self.clear_frame(self.button_frame)
         self.clear_frame(self.plot_frame)
-        if hasattr(self, 'status_frame'):
-            self.status_frame.destroy()
+        self.Temperature_Widget.destroy()
