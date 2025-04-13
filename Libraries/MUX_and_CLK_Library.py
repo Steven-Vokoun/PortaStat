@@ -1,5 +1,28 @@
 import os
 import numpy as np
+from Libraries.mcp23017 import MCP23017
+
+GPA0 = 0
+GPA1 = 1
+GPA2 = 2
+GPA3 = 3
+GPA4 = 4
+GPA5 = 5
+GPA6 = 6
+GPA7 = 7
+GPB0 = 8
+GPB1 = 9
+GPB2 = 10
+GPB3 = 11
+GPB4 = 12
+GPB5 = 13
+GPB6 = 14
+GPB7 = 15
+ALL_GPIO = [GPA0, GPA1, GPA2, GPA3, GPA4, GPA5, GPA6, GPA7, GPB0, GPB1, GPB2, GPB3, GPB4, GPB5, GPB6, GPB7]
+
+HIGH = 0xFF
+LOW = 0x00
+
 
 try:
     from smbus2 import SMBus
@@ -52,10 +75,7 @@ GPB3 = CAL1
 GPB4 = CAL2
 GPB5 = CAL3
 GPB6 = CAL4
-GPB7 = CAL5
-'''
 
-'''
 RI0 RI1 RI2
 0 0 0 = 10
 0 0 1 = 10
@@ -76,7 +96,7 @@ RO0 RO1 RO2
 1 1 0 = 75k
 1 1 1 = 100k
 
-CAL0 CAL1 CAL2 CAL3 CAL4 CAL5
+CAL0 CAL1 CAL2 CAL3 CAL4
 00xxx = 100
 01xxx = 1k
 100xx = 10k
@@ -89,127 +109,134 @@ CAL0 CAL1 CAL2 CAL3 CAL4 CAL5
 11111 = Counter
 '''
 
-
-class Calibration_Mux:
+class Relays:
     def __init__(self):
-        GPIO.setwarnings(False)
-        pins = [9,10,22]  # 9 is A2, 10 A1, 22 A0
-        GPIO.setmode(GPIO.BCM)
-        for pin in pins:
-            GPIO.setup(pin, GPIO.OUT)
-            GPIO.output(pin, GPIO.LOW)
+        self.mcp = MCP23017()
+        #Cal Board
+        self.mcp.digital_write(GPB2, LOW)
+        self.mcp.digital_write(GPB3, LOW)
+        self.mcp.digital_write(GPB4, LOW)
+        self.mcp.digital_write(GPB5, LOW)
+        self.mcp.digital_write(GPB6, LOW)
+        #Output
+        self.mcp.digital_write(GPA2, LOW)
+        self.mcp.digital_write(GPA1, LOW)
+        self.mcp.digital_write(GPA0, LOW)
+        #Input
+        self.mcp.digital_write(GPA5, LOW)
+        self.mcp.digital_write(GPA4, LOW)
+        self.mcp.digital_write(GPA3, LOW)
+
     def select_calibration(self, setting):
-        if setting == '10Meg' or setting == 10e6 or setting == 0:
-            GPIO.output(9, GPIO.LOW)
-            GPIO.output(10, GPIO.LOW)
-            GPIO.output(22, GPIO.LOW)
-        elif setting == '1Meg' or setting == 1e6 or setting == 1:
-            GPIO.output(9, GPIO.LOW)
-            GPIO.output(10, GPIO.LOW)
-            GPIO.output(22, GPIO.HIGH)
-        elif setting == '100k' or setting == 100e3 or setting == 2:
-            GPIO.output(9, GPIO.LOW)
-            GPIO.output(10, GPIO.HIGH)
-            GPIO.output(22, GPIO.LOW)
-        elif setting == '10k' or setting == 10e3 or setting == 3:
-            GPIO.output(9, GPIO.LOW)
-            GPIO.output(10, GPIO.HIGH)
-            GPIO.output(22, GPIO.HIGH)
-        elif setting == '100' or setting == 100 or setting == 4:
-            GPIO.output(9, GPIO.HIGH)
-            GPIO.output(10, GPIO.LOW)
-            GPIO.output(22, GPIO.LOW)
-        elif setting == 'Randles' or setting == 5:
-            GPIO.output(9, GPIO.HIGH)
-            GPIO.output(10, GPIO.LOW)
-            GPIO.output(22, GPIO.HIGH)
-        elif setting == 'Counter0' or setting == 6:
-            GPIO.output(9, GPIO.HIGH)
-            GPIO.output(10, GPIO.HIGH)
-            GPIO.output(22, GPIO.LOW)
-        elif setting == 'Counter1' or setting == 7:
-            GPIO.output(9, GPIO.HIGH)
-            GPIO.output(10, GPIO.HIGH)
-            GPIO.output(22, GPIO.HIGH)
+        if setting == '100' or setting == 100 or setting == 0:
+            self.mcp.digital_write(GPB2, LOW)
+            self.mcp.digital_write(GPB3, LOW)
+            self.mcp.digital_write(GPB4, LOW)
+            self.mcp.digital_write(GPB5, LOW)
+            self.mcp.digital_write(GPB6, LOW)
+        elif setting == '1k' or setting == 1e3 or setting == 1:
+            self.mcp.digital_write(GPB2, LOW)
+            self.mcp.digital_write(GPB3, HIGH)
+            self.mcp.digital_write(GPB4, LOW)
+            self.mcp.digital_write(GPB5, LOW)
+            self.mcp.digital_write(GPB6, LOW)
+        elif setting == '10k' or setting == 10e3 or setting == 2:
+            self.mcp.digital_write(GPB2, HIGH)
+            self.mcp.digital_write(GPB3, LOW)
+            self.mcp.digital_write(GPB4, LOW)
+            self.mcp.digital_write(GPB5, LOW)
+            self.mcp.digital_write(GPB6, LOW)
+        elif setting == '50k' or setting == 50e3 or setting == 3:
+            self.mcp.digital_write(GPB2, HIGH)
+            self.mcp.digital_write(GPB3, LOW)
+            self.mcp.digital_write(GPB4, HIGH)
+            self.mcp.digital_write(GPB5, LOW)
+            self.mcp.digital_write(GPB6, LOW)
+        elif setting == '100k' or setting == 100e3 or setting == 4:
+            self.mcp.digital_write(GPB2, HIGH)
+            self.mcp.digital_write(GPB3, HIGH)
+            self.mcp.digital_write(GPB4, LOW)
+            self.mcp.digital_write(GPB5, LOW)
+            self.mcp.digital_write(GPB6, LOW)
+        elif setting == '500k' or setting == 500e3 or setting == 5:
+            self.mcp.digital_write(GPB2, HIGH)
+            self.mcp.digital_write(GPB3, HIGH)
+            self.mcp.digital_write(GPB4, LOW)
+            self.mcp.digital_write(GPB5, HIGH)
+            self.mcp.digital_write(GPB6, LOW)
+        elif setting == '1Meg' or setting == 1e6 or setting == 6:
+            self.mcp.digital_write(GPB2, HIGH)
+            self.mcp.digital_write(GPB3, HIGH)
+            self.mcp.digital_write(GPB4, HIGH)
+            self.mcp.digital_write(GPB5, LOW)
+            self.mcp.digital_write(GPB6, LOW)
+        elif setting == '10Meg' or setting == 1e6 or setting == 7:
+            self.mcp.digital_write(GPB2, HIGH)
+            self.mcp.digital_write(GPB3, HIGH)
+            self.mcp.digital_write(GPB4, HIGH)
+            self.mcp.digital_write(GPB5, LOW)
+            self.mcp.digital_write(GPB6, HIGH)
+        elif setting == 'Randles' or setting == 8:
+            self.mcp.digital_write(GPB2, HIGH)
+            self.mcp.digital_write(GPB3, HIGH)
+            self.mcp.digital_write(GPB4, HIGH)
+            self.mcp.digital_write(GPB5, HIGH)
+            self.mcp.digital_write(GPB6, LOW)
+        elif setting == 'Randles' or setting == 9:
+            self.mcp.digital_write(GPB2, HIGH)
+            self.mcp.digital_write(GPB3, HIGH)
+            self.mcp.digital_write(GPB4, HIGH)
+            self.mcp.digital_write(GPB5, HIGH)
+            self.mcp.digital_write(GPB6, HIGH)
 
-class Output_Gain_Mux:
-#GPA2 = SSR3 = RO0
-#GPA1 = SSR4 = RO1
-#GPA0 = SSR5 = RO2
-
-#RO0 RO1 RO2
-#0 0 0 = 1k
-#0 0 1 = 1k
-#0 1 0 = 5k
-#0 1 1 = 5k
-#1 0 0 = 10k
-#1 0 1 = 50k
-#1 1 0 = 75k
-#1 1 1 = 100k
-
-    def __init__(self, GPIO_Expander, sensor):
-        self.GPIO_Expander = GPIO_Expander
-        self.sensor = sensor
-        GPIO_Expander.digital_write(GPA2, LOW)
-        GPIO_Expander.digital_write(GPA1, LOW)
-        GPIO_Expander.digital_write(GPA0, LOW)
-    def select_gain(self, setting):
+    def set_output_gain(self, setting):
         if setting == '1x' or setting == 0:
-            GPIO_Expander.digital_write(GPA2, HIGH)
-            GPIO_Expander.digital_write(GPA1, HIGH)
-            GPIO_Expander.digital_write(GPA0, HIGH)
+            self.mcp.digital_write(GPA2, HIGH)
+            self.mcp.digital_write(GPA1, HIGH)
+            self.mcp.digital_write(GPA0, HIGH)
         elif setting == '.75x' or setting == 1:
-            GPIO_Expander.digital_write(GPA2, HIGH)
-            GPIO_Expander.digital_write(GPA1, HIGH)
-            GPIO_Expander.digital_write(GPA0, LOW)
+            self.mcp.digital_write(GPA2, HIGH)
+            self.mcp.digital_write(GPA1, HIGH)
+            self.mcp.digital_write(GPA0, LOW)
         elif setting == '.5x' or setting == 2:
-            GPIO_Expander.digital_write(GPA2, HIGH)
-            GPIO_Expander.digital_write(GPA1, LOW)
-            GPIO_Expander.digital_write(GPA0, HIGH)
+            self.mcp.digital_write(GPA2, HIGH)
+            self.mcp.digital_write(GPA1, LOW)
+            self.mcp.digital_write(GPA0, HIGH)
         elif setting == '.1x' or setting == 3:
-            GPIO_Expander.digital_write(GPA2, HIGH)
-            GPIO_Expander.digital_write(GPA1, LOW)
-            GPIO_Expander.digital_write(GPA0, LOW)
+            self.mcp.digital_write(GPA2, HIGH)
+            self.mcp.digital_write(GPA1, LOW)
+            self.mcp.digital_write(GPA0, LOW)
         elif setting == '.05x' or setting == 4:
-            GPIO_Expander.digital_write(GPA2, LOW)
-            GPIO_Expander.digital_write(GPA1, HIGH)
-            GPIO_Expander.digital_write(GPA0, LOW)
+            self.mcp.digital_write(GPA2, LOW)
+            self.mcp.digital_write(GPA1, HIGH)
+            self.mcp.digital_write(GPA0, LOW)
         elif setting == '.01x' or setting == 5:
-            GPIO_Expander.digital_write(GPA2, LOW)
-            GPIO_Expander.digital_write(GPA1, LOW)
-            GPIO_Expander.digital_write(GPA0, LOW)
+            self.mcp.digital_write(GPA2, LOW)
+            self.mcp.digital_write(GPA1, LOW)
+            self.mcp.digital_write(GPA0, LOW)
 
-class Input_Gain_Mux:
-#GPA5 = SSR0 = RI0
-#GPA4 = SSR1 = RI1
-#GPA3 = SSR2 = RI2
-
-#RI0 RI1 RI2
-#0 0 0 = 10
-#0 0 1 = 10
-#0 1 0 = 100
-#0 1 1 = 100
-#1 0 0 = 1k
-#1 0 1 = 10k
-#1 1 0 = 100k
-#1 1 1 = 1Meg
-
-    def __init__(self, GPIO_Expander, sensor):
-        pins = [24,23]  # 24 is A1, 23 is A0
-        GPIO.setmode(GPIO.BCM)
-        for pin in pins:
-            GPIO.setup(pin, GPIO.OUT)
-            GPIO.output(pin, GPIO.LOW)
-    def select_gain(self, setting):
-        if setting == '100x' or setting == 100 or setting == 0:
-            GPIO.output(24, GPIO.LOW)
-            GPIO.output(23, GPIO.LOW)
-        elif setting == '10kx' or setting == 10e3 or setting == 1:
-            GPIO.output(24, GPIO.LOW)
-            GPIO.output(23, GPIO.HIGH)
-        elif setting == '100kx' or setting == 100e3 or setting == 2:
-            GPIO.output(24, GPIO.HIGH)
-            GPIO.output(23, GPIO.LOW)
-        elif setting == '1Mx' or setting == 1e6 or setting == 3:
-            GPIO.output(24, GPIO.HIGH)
-            GPIO.output(23, GPIO.HIGH)
+    def set_input_gain(self, setting):
+        if setting == '10x' or setting == 10 or setting == 0:
+            self.mcp.digital_write(GPA5, LOW)
+            self.mcp.digital_write(GPA4, LOW)
+            self.mcp.digital_write(GPA3, LOW)
+        elif setting == '100x' or setting == 100 or setting == 1:
+            self.mcp.digital_write(GPA5, LOW)
+            self.mcp.digital_write(GPA4, HIGH)
+            self.mcp.digital_write(GPA3, LOW)
+        elif setting == '1kx' or setting == 1e3 or setting == 2:
+            self.mcp.digital_write(GPA5, HIGH)
+            self.mcp.digital_write(GPA4, LOW)
+            self.mcp.digital_write(GPA3, LOW)
+        elif setting == '10kx' or setting == 10e3 or setting == 3:
+            self.mcp.digital_write(GPA5, HIGH)
+            self.mcp.digital_write(GPA4, LOW)
+            self.mcp.digital_write(GPA3, HIGH)
+        elif setting == '100kx' or setting == 100e3 or setting == 4:
+            self.mcp.digital_write(GPA5, HIGH)
+            self.mcp.digital_write(GPA4, HIGH)
+            self.mcp.digital_write(GPA3, LOW)
+        elif setting == '1Megx' or setting == 1e6 or setting == 4:
+            self.mcp.digital_write(GPA5, HIGH)
+            self.mcp.digital_write(GPA4, HIGH)
+            self.mcp.digital_write(GPA3, HIGH)
