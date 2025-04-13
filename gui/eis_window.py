@@ -60,7 +60,7 @@ class EISWindow:
                             'measure_temperature': lambda: 25,
                             'send_cmd': lambda x: None,
                             'set_output_voltage': lambda x,y: None,
-                            'Calibration_Sweep': lambda a,b,c,d,e,f,g: None
+                            'Calibration_Sweep': lambda a,b,c,d,e,f,g: [0]*3
                         })()
             self.CLK = LTC6904() if not dummy else type('DummyCLK', (), {
                             'Turn_On_Clock': lambda x: None
