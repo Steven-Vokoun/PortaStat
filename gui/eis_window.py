@@ -53,13 +53,13 @@ class EISWindow:
         self.create_section_label(self.controls_frame, "Experiment Settings", 0)
         self.setup_calibrate_and_voltage()
         self.setup_freq_and_spacing()
-        
+
         self.create_section_label(self.controls_frame, "Analysis Settings", 4)
         self.setup_circuit_and_fitting()
-        
+
         self.create_section_label(self.controls_frame, "Experiment Control", 7)
         self.setup_step_size_and_start()
-        
+
         self.create_section_label(self.controls_frame, "Results", 9)
         self.setup_plot_and_params()
         self.setup_export_and_notification()
@@ -82,7 +82,7 @@ class EISWindow:
                     self.Output_Gain_Mux = type('DummyMux', (), {'select_gain': lambda x: None})()
                     self.Input_Gain_Mux = type('DummyMux', (), {'select_gain': lambda x: None})()
                     self.CLK = type('DummyCLK', (), {'Turn_On_Clock': lambda x: None})()
-            
+
             self.hardware = DummyHardware()
         else:
             self.hardware = self.HardwareComponents()
@@ -126,15 +126,15 @@ class EISWindow:
         else:
             self.temperature = self.hardware.sensor.measure_temperature()
             self.hardware.sensor.send_cmd('STANDBY')
-        
+
         # Create a frame for status indicators
         self.status_frame = ctk.CTkFrame(self.toolbar_frame)
         self.status_frame.pack(side=ctk.RIGHT, padx=10)
-        
+
         # Temperature display
         temp_icon = ctk.CTkLabel(self.status_frame, text="🌡️", font=("Helvetica", 14))
         temp_icon.pack(side=ctk.LEFT, padx=(5,0))
-        
+
         self.Temperature_Widget = ctk.CTkLabel(
             self.status_frame,
             text=f"{self.temperature}°C",
@@ -149,14 +149,14 @@ class EISWindow:
         # Battery display
         self.battery_icon = ctk.CTkLabel(self.status_frame, text="🔋", font=("Helvetica", 14))
         self.battery_icon.pack(side=ctk.LEFT, padx=(5,0))
-        
+
         self.battery_widget = ctk.CTkLabel(
             self.status_frame,
             text="100%",
             font=("Helvetica", 12)
         )
         self.battery_widget.pack(side=ctk.LEFT, padx=(0,5))
-        
+
         # Start periodic battery update
         self.update_battery_level()
 
@@ -172,7 +172,7 @@ class EISWindow:
             except:
                 # Fallback if battery info is not available
                 battery_level = -1
-        
+
         # Update battery icon and text based on level
         if battery_level >= 0:
             # Update icon based on battery level
@@ -180,11 +180,11 @@ class EISWindow:
                 self.battery_icon.configure(text="🪫")  # Low battery icon
             else:
                 self.battery_icon.configure(text="🔋")  # Normal battery icon
-                
+
             self.battery_widget.configure(text=f"{battery_level}%")
         else:
             self.battery_widget.configure(text="N/A")
-        
+
         # Schedule next update in 30 seconds using the root window
         self.root.after(30000, self.update_battery_level)
 
@@ -196,7 +196,7 @@ class EISWindow:
         matplotlib.rcParams['axes.labelcolor'] = '#ffffff'
         matplotlib.rcParams['xtick.color'] = '#ffffff'
         matplotlib.rcParams['ytick.color'] = '#ffffff'
-        
+
         self.figure, self.ax = plt.subplots(figsize=(8, 6))
         self.figure.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.15)
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.plot_frame)
@@ -216,7 +216,7 @@ class EISWindow:
 
         self.voltage_label = ctk.CTkLabel(self.calibrate_voltage_frame, text="Voltage (mV):", font=("Helvetica", 12))
         self.voltage_label.pack(side=ctk.LEFT, padx=5)
-        
+
         voltage_values = ["2", "4", "10", "20", "38", "100", "200", "380", "1000", "2000"]
         self.voltage_dropdown = ctk.CTkComboBox(
             self.calibrate_voltage_frame,
@@ -283,7 +283,7 @@ class EISWindow:
         self.impedance_slider.pack(side=ctk.LEFT, padx=5, fill=ctk.X, expand=True)
         self.impedance_value_label = ctk.CTkLabel(self.impedance_frame, text='100', width=50)
         self.impedance_value_label.pack(side=ctk.LEFT, padx=2)
-        
+
         # Spacing Type
         self.spacing_type_frame = ctk.CTkFrame(self.controls_frame)
         self.spacing_type_frame.grid(row=3, column=0, pady=(0, 10), padx=5, sticky="ew")
@@ -341,10 +341,10 @@ class EISWindow:
         # Output location selection
         output_frame = ctk.CTkFrame(settings_frame)
         output_frame.pack(fill=ctk.X, padx=5, pady=2)
-        
+
         output_label = ctk.CTkLabel(output_frame, text="Output Location:", font=("Helvetica", 12))
         output_label.pack(side=ctk.LEFT, padx=5)
-        
+
         locations = ['Counter0', 'Counter1', 'Randles', '100', '10k', '100k', '1Meg', '10Meg']
         self.output_location_dropdown = ctk.CTkComboBox(
             output_frame,
@@ -358,7 +358,7 @@ class EISWindow:
         # Auto gain checkbox
         gain_frame = ctk.CTkFrame(settings_frame)
         gain_frame.pack(fill=ctk.X, padx=5, pady=2)
-        
+
         self.binary_search_checkbox = ctk.CTkCheckBox(
             gain_frame,
             variable=self.binary_search,
@@ -410,7 +410,7 @@ class EISWindow:
         # Parameters display with title
         params_frame = ctk.CTkFrame(self.circuit_type_frame)
         params_frame.pack(side=ctk.LEFT, pady=2, padx=5, fill=ctk.BOTH, expand=True)
-        
+
         params_label = ctk.CTkLabel(params_frame, text="Fitted Parameters:", font=("Helvetica", 12))
         params_label.pack(pady=(3,0), padx=5)
 
@@ -420,11 +420,11 @@ class EISWindow:
 
     def setup_plot_and_params(self):
         self.plot_type = ctk.StringVar(value="mag_vs_freq")
-        
+
         # Create a frame for plot controls with a title
         plot_controls_frame = ctk.CTkFrame(self.button_frame)
         plot_controls_frame.pack(fill=ctk.X, padx=10, pady=5)
-        
+
         plot_label = ctk.CTkLabel(plot_controls_frame, text="Plot Type:", font=("Helvetica", 12, "bold"))
         plot_label.pack(side=ctk.LEFT, padx=(10,20))
 
@@ -485,7 +485,7 @@ class EISWindow:
         self.notification_box.insert(ctk.END, message)
         self.notification_box.see(ctk.END)
         self.notification_box.configure(state="disabled")
-        
+
         # Automatically clear old messages if too many
         content = self.notification_box.get("1.0", ctk.END)
         lines = content.split('\n')
@@ -501,7 +501,7 @@ class EISWindow:
             self.send_notification("No data to export. Please run an experiment first.")
         else:
             export_to_usb(self.send_notification, self.freq_data, self.real_data, self.imag_data)
-    
+
     def update_voltage(self, why):
         set_output_amplitude(self.voltage.get(), self.hardware.sensor, self.hardware.relays, self.send_notification)
 
@@ -519,7 +519,7 @@ class EISWindow:
         self.start_button.configure(state="disabled", text="Running...")
         self.output_location_dropdown.configure(state="disabled")
         self.binary_search_checkbox.configure(state="disabled")
-        
+
         try:
             if os.name == 'nt':
                 run_demo_EIS_experiment(
@@ -583,17 +583,17 @@ class EISWindow:
 
     def update_plot(self):
         plot_type = self.plot_type.get()
-        
+
         # Clear previous plot
         self.ax.clear()
-        
+
         if not hasattr(self, 'freq_data') or self.freq_data is None:
             self.ax.text(0.5, 0.5, 'No data available\nRun an experiment first',
                         ha='center', va='center', transform=self.ax.transAxes,
                         color='white', fontsize=12)
             self.canvas.draw()
             return
-            
+
         if plot_type == "mag_vs_freq":
             self.plot_freq_vs_mag()
         elif plot_type == "phase_vs_freq":
