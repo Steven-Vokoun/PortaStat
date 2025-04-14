@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
 import os
+import threading
+import time
 
 from Functions.eis import fit_eis_data, export_to_usb, run_demo_EIS_experiment, calibrate_all, set_output_amplitude, conduct_experiment
 from Libraries.MUX_and_CLK_Library import Relays, LTC6904
@@ -328,10 +330,15 @@ class EISWindow:
         self.export_frame = ctk.CTkFrame(self.controls_frame)
         self.export_frame.pack(pady=3, padx=5, anchor="n", fill=ctk.X)
 
+        # Create and pack the progress bar on its own row at the top
+        self.progress_bar = ctk.CTkProgressBar(self.export_frame)
+        self.progress_bar.set(0)  # Initialize to zero progress
+        self.progress_bar.pack(fill=ctk.X, pady=(0, 15))  # pady to add spacing below the bar
+
         self.export_button = ctk.CTkButton(self.export_frame, text="Export Data", command=self.export_data)
         self.export_button.pack(side=ctk.LEFT, pady=3, padx=5)
 
-        self.notification_box = ctk.CTkTextbox(self.export_frame, height=10, width=275)
+        self.notification_box = ctk.CTkTextbox(self.export_frame, height=20, width=275)
         self.notification_box.pack(side=ctk.LEFT, padx=2)
         self.notification_box.insert(ctk.END, "Welcome! Please calibrate your device.")
 
@@ -367,8 +374,15 @@ class EISWindow:
         self.output_location_dropdown.configure(state="disabled")
         self.binary_search_checkbox.configure(state="disabled")
 
+        self.progress_bar.set(0)
+        threading.Thread(target=self._threaded_expirement, daemon=True).start()
+    
+    def _threaded_expirement(self):
         try:
             if os.name == 'nt':
+                for i in range(1,101):
+                    self.progress_bar.set(i/100)
+                    time.sleep(0.05)
                 run_demo_EIS_experiment(
                     self.update_data,
                     int(self.min_freq_slider.get()),
