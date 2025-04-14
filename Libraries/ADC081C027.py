@@ -45,8 +45,7 @@ class ADC081C021:
     """
     Library for the ADC081C021 8-Bit I²C-Compatible ADC with Alert Function.
 
-    This class supports reading the conversion result, configuring alert thresholds, and
-    reading internal registers based on the ADC081C021/C027 datasheet :contentReference[oaicite:1]{index=1}.
+    This class supports reading the conversion result, other functionality was ommited for simplicity.
 
     The device uses a pointer register system to select which internal register is accessed.
     The register pointer codes are defined below:
