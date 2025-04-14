@@ -84,6 +84,7 @@ class I2C():
 	def __init__(self, smbus):
 		"""
 		Wrapper class for the smbus
+
 		:param smbus: the smbus to send and receive data from smbus.SMBus(1)
 		"""
 		self.bus = SMBus(1)
@@ -149,6 +150,7 @@ class MCP23017:
 	def pin_mode(self, gpio, mode):
 		"""
 		Sets the given GPIO to the given mode INPUT or OUTPUT
+
 		:param gpio: the GPIO to set the mode to
 		:param mode: one of INPUT or OUTPUT
 		"""
@@ -158,6 +160,7 @@ class MCP23017:
 	def digital_write(self, gpio, direction):
 		"""
 		Sets the given GPIO to the given direction HIGH or LOW
+
 		:param gpio: the GPIO to set the direction to
 		:param direction: one of HIGH or LOW
 		"""
@@ -167,6 +170,7 @@ class MCP23017:
 	def digital_read(self, gpio):
 		"""
 		Reads the current direction of the given GPIO
+
 		:param gpio: the GPIO to read from
 		:return:
 		"""
@@ -177,6 +181,7 @@ class MCP23017:
 	def digital_read_all(self):
 		"""
 		Reads the current direction of the given GPIO
+
 		:param gpio: the GPIO to read from
 		:return:
 		"""
@@ -186,6 +191,7 @@ class MCP23017:
 	def set_interrupt(self, gpio, enabled):
 		"""
 		Enables or disables the interrupt of a given GPIO
+
 		:param gpio: the GPIO where the interrupt needs to be set, this needs to be one of GPAn or GPBn constants
 		:param enabled: enable or disable the interrupt
 		"""
@@ -195,6 +201,7 @@ class MCP23017:
 	def set_all_interrupt(self, enabled):
 		"""
 		Enables or disables the interrupt of a all GPIOs
+
 		:param enabled: enable or disable the interrupt
 		"""
 		self.i2c.write_to(self.address, GPINTENA, 0xFF if enabled else 0x00)
@@ -203,6 +210,7 @@ class MCP23017:
 	def set_interrupt_mirror(self, enable):
 		"""
 		Enables or disables the interrupt mirroring
+
 		:param enable: enable or disable the interrupt mirroring
 		"""
 		self.set_bit_enabled(IOCONA, MIRROR_BIT, enable)
@@ -211,6 +219,7 @@ class MCP23017:
 	def read_interrupt_captures(self):
 		"""
 		Reads the interrupt captured register. It captures the GPIO port value at the time the interrupt occurred.
+
 		:return: a tuple of the INTCAPA and INTCAPB interrupt capture as a list of bit string
 		"""
 		return (self._get_list_of_interrupted_values_from(INTCAPA),
@@ -228,6 +237,7 @@ class MCP23017:
 	def read_interrupt_flags(self):
 		"""
 		Reads the interrupt flag which reflects the interrupt condition. A set bit indicates that the associated pin caused the interrupt.
+		
 		:return: a tuple of the INTFA and INTFB interrupt flags as list of bit string
 		"""
 		return (self._read_interrupt_flags_from(INTFA),

@@ -10,6 +10,7 @@ import time
 from Functions.eis import fit_eis_data, export_to_usb, run_demo_EIS_experiment, calibrate_all, set_output_amplitude, conduct_experiment
 from Libraries.MUX_and_CLK_Library import Relays, LTC6904
 from Libraries.AD5933_Library import AD5933
+from Libraries.ADC081C027 import ADC081C021
 
 class EISWindow:
     def __init__(self, plot_frame, controls_frame, button_frame, toolbar_frame):
@@ -150,13 +151,8 @@ class EISWindow:
             # Dummy battery level for Windows testing
             battery_level = 85
         else:
-            try:
-                # Read battery level from system
-                with open('/sys/class/power_supply/battery/capacity', 'r') as f:
-                    battery_level = int(f.read().strip())
-            except:
-                # Fallback if battery info is not available
-                battery_level = -1
+            battery_measurement_adc = ADC081C021()
+            battery_level = battery_measurement_adc.read_voltage()
 
         # Update battery icon and text based on level
         if battery_level >= 0:
