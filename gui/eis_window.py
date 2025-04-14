@@ -74,6 +74,9 @@ class EISWindow:
                             'set_output_gain': lambda x,y: None,
                             'select_calibration': lambda x,y: None
                         })()
+            self.battery_lvl_adc = ADC081C021() if not dummy else type('DummyBatteryLvlAdc', (), {
+                            'read_voltage': lambda x: None
+                        })
     '''
     def Temporary_Test(self):
         self.hardware.Calibration_Mux.select_calibration('100k')
@@ -151,8 +154,7 @@ class EISWindow:
             # Dummy battery level for Windows testing
             battery_level = 85
         else:
-            battery_measurement_adc = ADC081C021()
-            battery_level = battery_measurement_adc.read_voltage()
+            battery_level = self.hardware.battery_lvl_adc.read_voltage()
 
         # Update battery icon and text based on level
         if battery_level >= 0:
