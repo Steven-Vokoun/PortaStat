@@ -409,7 +409,8 @@ class EISWindow:
                     num_steps,
                     spacing_type,
                     output_location,
-                    binary_search
+                    binary_search,
+                    self.progress_bar
                 )
                 self.update_plot()
         finally:

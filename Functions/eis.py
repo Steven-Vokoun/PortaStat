@@ -239,7 +239,7 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
         send_notification(impedance, newline=False)
     send_notification("Calibration complete")
 
-def conduct_experiment(hardware, send_notification, voltage, estimated_impedance, start_freq, end_freq, num_steps = 100, spacing_type='logarithmic', output_location = 'Counter', binary_search = True):
+def conduct_experiment(hardware, send_notification, voltage, estimated_impedance, start_freq, end_freq, num_steps = 100, spacing_type='logarithmic', output_location = 'Counter', binary_search = True, progress_bar=None):
     
     send_notification("Running EIS experiment...")
 
@@ -253,7 +253,7 @@ def conduct_experiment(hardware, send_notification, voltage, estimated_impedance
     estimated_impedance = int(impedance_values[estimated_impedance])
 
     if binary_search == True:
-        freqs, real, imag, Phase = conduct_binary_search_experiment(hardware, send_notification, voltage, estimated_impedance, start_freq, end_freq, num_steps, spacing_type)
+        freqs, real, imag, Phase = conduct_binary_search_experiment(hardware, send_notification, voltage, estimated_impedance, start_freq, end_freq, num_steps, spacing_type, progress_bar)
         
     else:
         estimated_gain = find_gain_from_voltage_and_Impedance(voltage, estimated_impedance, send_notification)
@@ -302,7 +302,7 @@ def binary_search_gain(hardware, send_notification, voltage, estimated_impedance
 
     return impedance, real, imag, Phase
 
-def conduct_binary_search_experiment(hardware, send_notification, voltage, impedance, start_freq, end_freq, num_steps, spacing_type):
+def conduct_binary_search_experiment(hardware, send_notification, voltage, impedance, start_freq, end_freq, num_steps, spacing_type, progress_bar):
     # Setup Frequencies of interest
     if spacing_type == 'logarithmic':
         freqs = np.logspace(np.log10(start_freq), np.log10(end_freq), num=num_steps)
@@ -325,6 +325,7 @@ def conduct_binary_search_experiment(hardware, send_notification, voltage, imped
 
     # Loop through each frequency
     for i, freq in enumerate(freqs):
+        progress_bar.set(((i+1)/len(freqs))*100)
         impedance, real_adjusted, imag_adjusted, Phase = binary_search_gain(
             hardware, send_notification, voltage, impedance, freq, calibration_data)
         real_results[i] = real_adjusted
