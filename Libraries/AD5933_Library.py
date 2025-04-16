@@ -341,6 +341,9 @@ class AD5933:
         Impedance_Magnitude = self.Calculate_Impedance_Mag_At_Frequency(Impedance, freq)
         Impedance_Phase = self.Calculate_Impedance_Phase_At_Frequency(Impedance, freq)
         real, imag = self.run_freq_sweep(freq)
+        # avoid division by 0 errors
+        real = 1 if real==0 else real
+        imag = 1 if imag==0 else imag
         print(real,imag)
         mag = np.sqrt((real**2) + (imag **2))
         GainFactor = 1/(Impedance_Magnitude * mag)

@@ -6,6 +6,7 @@ import matplotlib
 import os
 import threading
 import time
+import emoji
 
 from Functions.eis import fit_eis_data, export_to_usb, run_demo_EIS_experiment, calibrate_all, set_output_amplitude, conduct_experiment
 from Libraries.MUX_and_CLK_Library import Relays, LTC6904
@@ -121,7 +122,7 @@ class EISWindow:
         self.status_frame.pack(side=ctk.RIGHT, padx=10)
 
         # Temperature display
-        self.temp_icon = ctk.CTkLabel(self.status_frame, text=None, image=self.emoji("🌡️", offset=9))
+        self.temp_icon = ctk.CTkLabel(self.status_frame, text=None, image=self.emoji(emoji.emojize(':thumbs_up:'), offset=9))
         self.temp_icon.pack(side=ctk.LEFT, padx=(10,0))
 
         self.Temperature_Widget = ctk.CTkLabel(
@@ -136,7 +137,7 @@ class EISWindow:
         self.separator.pack(side=ctk.LEFT, padx=5)
 
         # Battery display
-        self.battery_icon = ctk.CTkLabel(self.status_frame, text=None, image=self.emoji("🔋"))
+        self.battery_icon = ctk.CTkLabel(self.status_frame, text=None, image=self.emoji(emoji.emojize(':thumbs_up:')))
         self.battery_icon.pack(side=ctk.LEFT, padx=(5,0))
 
         self.battery_widget = ctk.CTkLabel(
@@ -160,9 +161,9 @@ class EISWindow:
         if battery_level >= 0:
             # Update icon based on battery level
             if battery_level <= 20:
-                self.battery_icon.configure(image=self.emoji("🪫"))  # Low battery icon
+                self.battery_icon.configure(image=self.emoji(emoji.emojize(':thumbs_up:')))  # Low battery icon
             else:
-                self.battery_icon.configure(image=self.emoji("🔋"))  # Normal battery icon
+                self.battery_icon.configure(image=self.emoji(emoji.emojize(':thumbs_up:')))  # Normal battery icon
 
             self.battery_widget.configure(text=f"{battery_level}%")
         else:
