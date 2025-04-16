@@ -545,10 +545,10 @@ class EISWindow:
         from customtkinter import CTkButton as Btn, CTkImage, CTk
         from PIL import Image, ImageDraw, ImageFont
         # convert emoji to CTkImage
-        font = ImageFont.truetype("seguiemj.ttf", size=int(size/1.5))
+        #font = ImageFont.truetype("seguiemj.ttf", size=int(size/1.5))
         img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
         draw.text((size/2 + offset, size/2), emoji,
-                embedded_color=True, font=font, anchor="mm")
+                embedded_color=True, anchor="mm")
         img = CTkImage(img, size=(size, size))
         return img
