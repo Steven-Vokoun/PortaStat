@@ -11,7 +11,7 @@ import emoji
 from Functions.eis import fit_eis_data, export_to_usb, run_demo_EIS_experiment, calibrate_all, set_output_amplitude, conduct_experiment
 from Libraries.MUX_and_CLK_Library import Relays, LTC6904
 from Libraries.AD5933_Library import AD5933
-from Libraries.ADC081C027 import ADC081C021
+#from Libraries.ADC081C027 import ADC081C021
 
 class EISWindow:
     def __init__(self, plot_frame, controls_frame, button_frame, toolbar_frame):
@@ -75,9 +75,9 @@ class EISWindow:
                             'set_output_gain': lambda x,y: None,
                             'select_calibration': lambda x,y: None
                         })()
-            self.battery_lvl_adc = ADC081C021() if not dummy else type('DummyBatteryLvlAdc', (), {
-                            'read_voltage': lambda x: None
-                        })
+            #self.battery_lvl_adc = ADC081C021() if not dummy else type('DummyBatteryLvlAdc', (), {
+            #                'read_voltage': lambda x: None
+            #            })
     '''
     def Temporary_Test(self):
         self.hardware.Calibration_Mux.select_calibration('100k')
@@ -155,7 +155,7 @@ class EISWindow:
             # Dummy battery level for Windows testing
             battery_level = 85
         else:
-            battery_level = self.hardware.battery_lvl_adc.read_voltage()
+            battery_level = 85#self.hardware.battery_lvl_adc.read_voltage()
 
         # Update battery icon and text based on level
         if battery_level >= 0:
