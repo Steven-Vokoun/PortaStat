@@ -20,7 +20,7 @@ class I2C:
     Wrapper class for smbus
     provide simple I²C transactions.
     """
-    def __init__(self, bus_no=1):
+    def __init__(self, bus_no=2):
         self.bus = SMBus(bus_no)
 
     def write_byte(self, address, value):
