@@ -1,4 +1,4 @@
-from AD5933_Library import AD5933
+from Libraries.AD5933_Library import AD5933
 
 Resistor = 220_000
 sensor = AD5933()
