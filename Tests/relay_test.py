@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../')
 from Libraries.MUX_and_CLK_Library import Relays
 import time
 

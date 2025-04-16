@@ -1,16 +1,33 @@
+import sys
+sys.path.append('../')
 from Libraries.AD5933_Library import AD5933
+from Libraries.MUX_and_CLK_Library import Relays, LTC6904
+relays =  Relays()
+
+#Set Calibration
+class HardwareComponents:
+    def __init__(self, dummy):
+        self.sensor = AD5933() if not dummy else type('DummySensor', (), {
+                        'measure_temperature': lambda: 25,
+                        'send_cmd': lambda x: None,
+                        'set_output_voltage': lambda x,y: None,
+                        'Calibration_Sweep': lambda a,b,c,d,e,f,g: [0]*3
+                    })()
+        self.CLK = LTC6904() if not dummy else type('DummyCLK', (), {
+                        'Turn_On_Clock': lambda x: None
+                    })()
+hardware = HardwareComponents(dummy=False)
 
 Resistor = 220_000
-sensor = AD5933()
-sensor.set_increment_number(0)
-sensor.set_settling_time_cycles(1000)
+hardware.sensor.set_increment_number(0)
+hardware.sensor.set_settling_time_cycles(1000)
 print('Calibrating')
-Cal_Freqs, Gain_Factors, Sys_Phases = sensor.Calibration_Sweep(Resistor, 5_000, 105_000, 200, spacing_type='linear')
+Cal_Freqs, Gain_Factors, Sys_Phases = hardware.sensor.Calibration_Sweep(Resistor, 5_000, 105_000, 200, hardware, spacing_type='linear')
 print('Sweeping')
-freqs, real, imag = sensor.Complete_Sweep(10_000, 100_000, 200, spacing_type='linear')
+freqs, real, imag = hardware.sensor.Complete_Sweep(10_000, 100_000, 200, hardware, spacing_type='linear')
 print('Adjusting')
-Magnitude = sensor.Adjust_Magnitude_Return_abs_Impedance(freqs, real, imag, Cal_Freqs, Gain_Factors)
-Phase = sensor.Adjust_Phase_Return_Impedance(freqs, real, imag, Cal_Freqs, Sys_Phases)
+Magnitude = hardware.sensor.Adjust_Magnitude_Return_abs_Impedance(freqs, real, imag, Cal_Freqs, Gain_Factors)
+Phase = hardware.sensor.Adjust_Phase_Return_Phase(freqs, real, imag, Cal_Freqs, Sys_Phases)
 
 import matplotlib.pyplot as plt
 
