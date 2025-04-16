@@ -81,7 +81,7 @@ INPUT = 0xFF
 OUTPUT = 0x00
 
 class I2C():
-	def __init__(self, smbus):
+	def __init__(self):
 		"""
 		Wrapper class for the smbus
 

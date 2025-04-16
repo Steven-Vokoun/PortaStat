@@ -91,7 +91,8 @@ class Relays:
     def __init__(self):
         self.mcp = MCP23017()
         # init relevant pins LOW
-        for pin in zip(ALL_GPIO["Cal Board"], ALL_GPIO["Output"], ALL_GPIO["Input"]):
+        relevant_gpio = ALL_GPIO["Cal Board"] + ALL_GPIO["Output"] + ALL_GPIO["Input"]
+        for pin in relevant_gpio:
             self.mcp.digital_write(pin, LOW)
 
     def select_calibration(self, setting):
