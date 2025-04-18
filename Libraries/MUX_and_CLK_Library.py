@@ -138,7 +138,7 @@ class Relays:
             self.mcp.digital_write(GPB4, LOW)
             self.mcp.digital_write(GPB5, HIGH)
             self.mcp.digital_write(GPB6, LOW)
-        elif setting == '10Meg' or setting == 1e6 or setting == 7:
+        elif setting == '10Meg' or setting == 10e6 or setting == 7:
             self.mcp.digital_write(GPB2, HIGH)
             self.mcp.digital_write(GPB3, HIGH)
             self.mcp.digital_write(GPB4, LOW)
