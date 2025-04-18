@@ -102,7 +102,7 @@ class ADC081C021:
         self._set_pointer(pointer)
         return self.i2c.read_i2c_block_data(self.address, pointer, length)
 
-    def read_conversion_result(self):
+    def _read_conversion_result(self):
         """
         Read the 16-bit conversion result from the ADC.
 
@@ -126,7 +126,7 @@ class ADC081C021:
 
         :return: The measured analog voltage.
         """
-        raw = self.read_conversion_result()
+        raw = self._read_conversion_result()
         voltage = (raw / 255.0) * self.vref
         return voltage
 
@@ -135,6 +135,6 @@ if __name__ == '__main__':
     # Instantiate the ADC library (default address 0x50, I2C bus 1, Vref = 3.3V)
     adc = ADC081C021()
     # Read the raw conversion result and computed voltage
-    voltage = adc.read_voltage()
-    
-    print("Measured Voltage: {:.3f} V".format(voltage))
+    while True:
+        voltage = adc.read_voltage()
+        print("Measured Voltage: {:.3f} V".format(voltage))
