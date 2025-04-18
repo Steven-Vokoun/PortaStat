@@ -133,7 +133,7 @@ class ADC081C021:
 
 # Example usage:
 if __name__ == '__main__':
-    # Instantiate the ADC library (default address 0x50, I2C bus 1, Vref = 3.3V)
+    # Instantiate the ADC library (default address 0x51, I2C bus 1, Vref = 3.3V)
     adc = ADC081C021()
     # Read the raw conversion result and computed voltage
     while True:
