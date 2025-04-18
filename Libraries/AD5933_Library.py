@@ -102,7 +102,7 @@ class AD5933:
         self.set_clock_source(clk_source)
         self.set_pga_gain(PGA_Gain)
         self.set_increment_number(0)
-        self.set_settling_time_cycles(500)
+        self.set_settling_time_cycles(1000)
 
     # I2C Functions
     def write_register(self, reg, value):
@@ -291,8 +291,8 @@ class AD5933:
             self.run_freq_sweep(freqs[0])
         for freq in freqs:
             self.clk_adjustment(hardware, freq)
-            _,_ = self.run_freq_sweep(freq)
-            _,_ = self.run_freq_sweep(freq)
+            #_,_ = self.run_freq_sweep(freq)
+            #_,_ = self.run_freq_sweep(freq)
             real, imag = self.run_freq_sweep(freq)
             real_data.append(real)
             imag_data.append(imag)
@@ -404,12 +404,22 @@ class AD5933:
 
         # LTC6904 min is 1khz -> 68khz
         # theoretical limit is .5hz
-        if frequency < 10e3:
-            sys_clk = frequency * 1000
-            self.set_clock_source('external')
+        if frequency <= 20 and frequency >= 10:
+            sys_clk = 25e3
+        if frequency > 20 and frequency <= 30:
+            sys_clk = 50e3
+        if frequency > 30 and frequency <= 100:
+            sys_clk = 100e3
+        if frequency > 100 and frequency <= 200:
+            sys_clk = 250e3
+        if frequency > 200 and frequency <= 300:
+            sys_clk = 1e6
+        if frequency > 300 and frequency <= 1000:
+            sys_clk = 2e6
+        if frequency > 1000 and frequency <= 5000:
+            sys_clk = 4e6
         else:
             sys_clk = 16.776e6
-            self.set_clock_source('internal')
         self.clk = sys_clk
         hardware.CLK.Turn_On_Clock(sys_clk)
 
