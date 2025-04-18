@@ -71,7 +71,7 @@ class ADC081C021:
     POINTER_VMIN          = 0x06
     POINTER_VMAX          = 0x07
 
-    def __init__(self, address=0x50, bus_no=1, vref=3.3):
+    def __init__(self, address=0x51, bus_no=1, vref=3.3):
         """
         ADC081C021 class for measuring battery voltage
 
