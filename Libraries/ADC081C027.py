@@ -1,4 +1,5 @@
 import os
+import time
 try:
     from smbus2 import SMBus
 except ImportError:
@@ -138,3 +139,4 @@ if __name__ == '__main__':
     while True:
         voltage = adc.read_voltage()
         print("Measured Voltage: {:.3f} V".format(voltage))
+        time.sleep(2)
