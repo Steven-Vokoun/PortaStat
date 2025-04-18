@@ -8,5 +8,5 @@ relays =  Relays()
 resistor_values = ['100', '1k', '10k', '50k', '100k', '500k', '1Meg', '10Meg', 'Randles', 'Counter']
 for res in resistor_values:
     print(f"setting calibration to {res}")
-    relays.select_calibration(res)
+    relays.set_input_gain(res)
     time.sleep(30) # in seconds
