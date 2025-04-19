@@ -363,17 +363,17 @@ class AD5933:
             raise ValueError('Invalid Frequency Spacing Type')
         #Repeat first data point 3 times to get the lowpass filter to settle
         self.clk_adjustment(hardware, freqs[0])
-        for i in range(3):
-            self.run_freq_sweep(freqs[0])
+        self.run_freq_sweep(freqs[0])
         #Run rest of the sweep
         for freq in freqs:
             self.clk_adjustment(hardware, freq)
-            _, _ = self.Calibrate_Single_Point(Impedance, freq)
-            gf1, sys_phase1 = self.Calibrate_Single_Point(Impedance, freq)
-            gf2, sys_phase2 = self.Calibrate_Single_Point(Impedance, freq)
-            gf3, sys_phase3 = self.Calibrate_Single_Point(Impedance, freq)
-            gf = (gf1 + gf2 + gf3) / 3
-            sys_phase = (sys_phase1 + sys_phase2 + sys_phase3) / 3
+            gf, sys_phase = self.Calibrate_Single_Point(Impedance, freq)
+            ## MULTIPLE SWEEPS FOR BETTER ACCURACY
+            #gf1, sys_phase1 = self.Calibrate_Single_Point(Impedance, freq)
+            #gf2, sys_phase2 = self.Calibrate_Single_Point(Impedance, freq)
+            #gf3, sys_phase3 = self.Calibrate_Single_Point(Impedance, freq)
+            #gf = (gf1 + gf2 + gf3) / 3
+            #sys_phase = (sys_phase1 + sys_phase2 + sys_phase3) / 3
             GainFactors.append(gf)
             Sys_Phases.append(sys_phase)
         #self.export_calibration_data(freqs, GainFactors, Sys_Phases) #########

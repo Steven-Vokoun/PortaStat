@@ -205,7 +205,7 @@ class EISWindow:
         self.min_freq_label = ctk.CTkLabel(self.min_freq_frame, text="Min Frequency:")
         self.min_freq_label.pack(side=ctk.LEFT, padx=5)
         self.min_freq_slider = ctk.CTkSlider(self.min_freq_frame, from_=10, to=20000, command=self.update_min_freq_label)
-        self.min_freq_slider.set(1000)
+        self.min_freq_slider.set(5000)
         self.min_freq_slider.pack(side=ctk.LEFT, padx=5, fill=ctk.X, expand=True)
         self.min_freq_value_label = ctk.CTkLabel(self.min_freq_frame, text=f"{self.min_freq_slider.get()}", width=50)
         self.min_freq_value_label.pack(side=ctk.LEFT, padx=2)
@@ -215,7 +215,7 @@ class EISWindow:
         self.max_freq_frame.pack(fill=ctk.X)
         self.max_freq_label = ctk.CTkLabel(self.max_freq_frame, text="Max Frequency:")
         self.max_freq_label.pack(side=ctk.LEFT, padx=5)
-        self.max_freq_slider = ctk.CTkSlider(self.max_freq_frame, from_=50000, to=200000, command=self.update_max_freq_label)
+        self.max_freq_slider = ctk.CTkSlider(self.max_freq_frame, from_=25000, to=200000, command=self.update_max_freq_label)
         self.max_freq_slider.set(100000)
         self.max_freq_slider.pack(side=ctk.LEFT, padx=5, fill=ctk.X, expand=True)
         self.max_freq_value_label = ctk.CTkLabel(self.max_freq_frame, text=f"{self.max_freq_slider.get()}", width=50)
@@ -226,8 +226,8 @@ class EISWindow:
         self.step_size_frame.pack(fill=ctk.X)
         self.step_size_label = ctk.CTkLabel(self.step_size_frame, text="Number Of Steps:")
         self.step_size_label.pack(side=ctk.LEFT, padx=5)
-        self.step_size_slider = ctk.CTkSlider(self.step_size_frame, from_=1, to=2000, command=self.update_step_size_label)
-        self.step_size_slider.set(100)
+        self.step_size_slider = ctk.CTkSlider(self.step_size_frame, from_=10, to=1000, command=self.update_step_size_label)
+        self.step_size_slider.set(50)
         self.step_size_slider.pack(side=ctk.LEFT, padx=5, fill=ctk.X, expand=True)
         self.step_size_value_label = ctk.CTkLabel(self.step_size_frame, text=f"{self.step_size_slider.get()}", width=50)
         self.step_size_value_label.pack(side=ctk.LEFT, padx=2)
@@ -238,19 +238,19 @@ class EISWindow:
         self.impedance_label = ctk.CTkLabel(self.impedance_frame, text="Estimated Impedance:")
         self.impedance_label.pack(side=ctk.LEFT, padx=5)
         self.impedance_slider = ctk.CTkSlider(self.impedance_frame, from_=0, to=5, command=self.update_impedance_label)
-        self.impedance_slider.set(0)
+        self.impedance_slider.set(4)
         self.impedance_slider.pack(side=ctk.LEFT, padx=5, fill=ctk.X, expand=True)
-        self.impedance_value_label = ctk.CTkLabel(self.impedance_frame, text='100', width=50)
+        self.impedance_value_label = ctk.CTkLabel(self.impedance_frame, text='100k', width=50)
         self.impedance_value_label.pack(side=ctk.LEFT, padx=2)
         
         # Spacing Type
         self.spacing_type_frame = ctk.CTkFrame(self.controls_frame)
         self.spacing_type_frame.pack(pady=5, padx=10, anchor="n", fill=ctk.X)
 
-        self.logarithmic_radio = ctk.CTkRadioButton(self.spacing_type_frame, text="Logarithmic Spacing", variable=self.spacing_type, value="logarithmic")
+        self.logarithmic_radio = ctk.CTkRadioButton(self.spacing_type_frame, text="Logarithmic", variable=self.spacing_type, value="logarithmic")
         self.logarithmic_radio.pack(side=ctk.LEFT, padx=10)
 
-        self.linear_radio = ctk.CTkRadioButton(self.spacing_type_frame, text="Linear Spacing", variable=self.spacing_type, value="linear")
+        self.linear_radio = ctk.CTkRadioButton(self.spacing_type_frame, text="Linear", variable=self.spacing_type, value="linear")
         self.linear_radio.pack(side=ctk.LEFT, padx=10)
 
     def update_min_freq_label(self, value):
@@ -308,19 +308,22 @@ class EISWindow:
     def setup_plot_and_params(self):
         self.plot_type = ctk.StringVar(value="mag_vs_freq")
 
-        self.freq_mag_button = ctk.CTkRadioButton(self.button_frame, text="Magnitude vs Frequency", variable=self.plot_type, value="mag_vs_freq", command=self.update_plot)
+        self.freq_mag_button = ctk.CTkRadioButton(self.button_frame, text="Mag vs Freq", variable=self.plot_type, value="mag_vs_freq", command=self.update_plot)
         self.freq_mag_button.pack(side=ctk.LEFT, padx=5)
 
-        self.freq_phase_button = ctk.CTkRadioButton(self.button_frame, text="Phase vs Frequency", variable=self.plot_type, value="phase_vs_freq", command=self.update_plot)
+        self.freq_mag_button = ctk.CTkRadioButton(self.button_frame, text="LogMag vs LogFreq", variable=self.plot_type, value="log_mag_vs_log_freq", command=self.update_plot)
+        self.freq_mag_button.pack(side=ctk.LEFT, padx=5)
+
+        self.freq_phase_button = ctk.CTkRadioButton(self.button_frame, text="Phase vs Freq", variable=self.plot_type, value="phase_vs_freq", command=self.update_plot)
         self.freq_phase_button.pack(side=ctk.LEFT, padx=5)
 
-        self.real_imag_button = ctk.CTkRadioButton(self.button_frame, text="Imaginary vs Real", variable=self.plot_type, value="imag_vs_real", command=self.update_plot)
+        self.real_imag_button = ctk.CTkRadioButton(self.button_frame, text="Imag vs Real", variable=self.plot_type, value="imag_vs_real", command=self.update_plot)
         self.real_imag_button.pack(side=ctk.LEFT, padx=5)
 
-        self.real_freq_button = ctk.CTkRadioButton(self.button_frame, text="Real vs Frequency", variable=self.plot_type, value="real_vs_freq", command=self.update_plot)
+        self.real_freq_button = ctk.CTkRadioButton(self.button_frame, text="Real vs Freq", variable=self.plot_type, value="real_vs_freq", command=self.update_plot)
         self.real_freq_button.pack(side=ctk.LEFT, padx=5)
 
-        self.imag_freq_button = ctk.CTkRadioButton(self.button_frame, text="Imaginary vs Frequency", variable=self.plot_type, value="imag_vs_freq", command=self.update_plot)
+        self.imag_freq_button = ctk.CTkRadioButton(self.button_frame, text="Imag vs Freq", variable=self.plot_type, value="imag_vs_freq", command=self.update_plot)
         self.imag_freq_button.pack(side=ctk.LEFT, padx=5)
 
         self.setup_plot()
@@ -454,13 +457,17 @@ class EISWindow:
             self.plot_freq_vs_real()
         elif plot_type == "imag_vs_freq":
             self.plot_freq_vs_imag()
+        elif plot_type == "log_mag_vs_log_freq":
+            print('log mag vs log freq')
+            self.plot_log_freq_vs_log_mag()
+        else:
+            print("Invalid plot type selected.")
 
     def plot_freq_vs_mag(self):
         self.ax.clear()
         self.ax.scatter(self.freq_data, np.sqrt(self.real_data**2 + self.imag_data**2), s=5)
         if self.freq_fit_data is not None:
             self.ax.plot(self.freq_fit_data, np.sqrt(self.real_fit_data**2 + self.imag_fit_data**2), color='red')
-        self.ax.set_xscale("log")
         self.ax.set_xlabel("Frequency")
         self.ax.set_ylabel("Magnitude")
         self.ax.set_title("Magnitude vs Frequency")
@@ -493,8 +500,7 @@ class EISWindow:
         if self.freq_fit_data is not None:
             self.ax.plot(self.freq_fit_data, abs(self.real_fit_data), color='red')
         self.ax.set_xscale("log")
-        self.ax.set_yscale("log")
-        self.ax.set_xlabel("Frequency")
+        self.ax.set_xlabel("Log Frequency")
         self.ax.set_ylabel("Real")
         self.ax.set_title("Real vs Frequency")
         self.canvas.draw()
@@ -505,10 +511,21 @@ class EISWindow:
         if self.freq_fit_data is not None:
             self.ax.plot(self.freq_fit_data, abs(self.imag_fit_data), color='red')
         self.ax.set_xscale("log")
-        self.ax.set_yscale("log")
-        self.ax.set_xlabel("Frequency")
+        self.ax.set_xlabel("Log Frequency")
         self.ax.set_ylabel("Imaginary")
         self.ax.set_title("Imaginary vs Frequency")
+        self.canvas.draw()
+
+    def plot_log_freq_vs_log_mag(self):
+        self.ax.clear()
+        self.ax.scatter(self.freq_data, np.sqrt(self.real_data**2 + self.imag_data**2), s=5)
+        if self.freq_fit_data is not None:
+            self.ax.plot(self.freq_fit_data, np.sqrt(self.real_fit_data**2 + self.imag_fit_data**2), color='red')
+        self.ax.set_xscale("log")
+        self.ax.set_yscale("log")
+        self.ax.set_xlabel("Log Frequency")
+        self.ax.set_ylabel("Log Magnitude")
+        self.ax.set_title("Magnitude vs Frequency")
         self.canvas.draw()
 
     def clear_frame(self, frame):
