@@ -419,6 +419,7 @@ class AD5933:
         if frequency > 1000 and frequency <= 5000:
             sys_clk = 4e6
         else:
+            print('Frequency out of range, setting to 16.776MHz')
             sys_clk = 16.776e6
         self.clk = sys_clk
         hardware.CLK.Turn_On_Clock(sys_clk)
