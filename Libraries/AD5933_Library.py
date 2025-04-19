@@ -404,6 +404,7 @@ class AD5933:
 
         # LTC6904 min is 1khz -> 68khz
         # theoretical limit is .5hz
+        
         if frequency <= 20 and frequency >= 10:
             sys_clk = 25e3
         elif frequency > 20 and frequency <= 30:
@@ -421,6 +422,7 @@ class AD5933:
         else:
             print('Frequency out of range, setting to 16.776MHz')
             sys_clk = 16.776e6
+        self.set_clock_source('external')  ##DO NOT WANT THIS LINE
         self.clk = sys_clk
         hardware.CLK.Turn_On_Clock(sys_clk)
 
