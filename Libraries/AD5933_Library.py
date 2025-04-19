@@ -406,17 +406,17 @@ class AD5933:
         # theoretical limit is .5hz
         if frequency <= 20 and frequency >= 10:
             sys_clk = 25e3
-        if frequency > 20 and frequency <= 30:
+        elif frequency > 20 and frequency <= 30:
             sys_clk = 50e3
-        if frequency > 30 and frequency <= 100:
+        elif frequency > 30 and frequency <= 100:
             sys_clk = 100e3
-        if frequency > 100 and frequency <= 200:
+        elif frequency > 100 and frequency <= 200:
             sys_clk = 250e3
-        if frequency > 200 and frequency <= 300:
+        elif frequency > 200 and frequency <= 300:
             sys_clk = 1e6
-        if frequency > 300 and frequency <= 1000:
+        elif frequency > 300 and frequency <= 1000:
             sys_clk = 2e6
-        if frequency > 1000 and frequency <= 5000:
+        elif frequency > 1000 and frequency <= 5000:
             sys_clk = 4e6
         else:
             print('Frequency out of range, setting to 16.776MHz')
