@@ -207,7 +207,7 @@ def find_phase_arctan(real, imag):
 
 
 
-def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, num_steps, spacing_type):
+def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, num_steps, spacing_type, progress_bar=None):
     """
     Calibrate all input gain factors
     """
@@ -218,16 +218,23 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
     set_output_amplitude(voltage, hardware.sensor, hardware.relays, send_notification)
 
     impedances = [10e6, 1e6, 100e3, 10e3, 100, 10]
-    for impedance in impedances:
+    gains = [10, 100, 1e3, 10e3, 100e3, 1e6]
+    tot_len = len(impedances)*len(gains)
+
+    for i, impedance in enumerate(impedances):
         hardware.relays.select_calibration(impedance)
         
         estimated_current = (voltage/1000)/impedance
         estimated_gain = None
-        gains = [10, 100, 1e3, 10e3, 100e3, 1e6]
-        for gain in gains:
+
+        for j, gain in enumerate(gains):
             if estimated_current * gain * 5 < 1.5:  #~~VCC/2
+                progress_ind = i*len(gains) + (j+1)
+                progress_bar.set( (progress_ind/tot_len) *100)
                 estimated_gain = gain
             else:
+                progress_ind = i*len(gains) + len(gains)
+                progress_bar.set( (progress_ind/tot_len) *100)
                 break
         if estimated_gain is None:
             send_notification("Unable to find suitable gain setting")
@@ -328,7 +335,7 @@ def conduct_binary_search_experiment(hardware, send_notification, voltage, imped
 
     # Loop through each frequency
     for i, freq in enumerate(freqs):
-        progress_bar.set(((i+1)/len(freqs))*100)
+        progress_bar.set( ((i+1)/len(freqs)) *100)
         impedance, real_adjusted, imag_adjusted, Phase = binary_search_gain(
             hardware, send_notification, voltage, impedance, freq, calibration_data)
         real_results[i] = real_adjusted

@@ -183,6 +183,7 @@ class EISWindow:
         self.calibrate_voltage_frame = ctk.CTkFrame(self.controls_frame)
         self.calibrate_voltage_frame.pack(pady=3, padx=5, anchor="n", fill=ctk.X)
 
+
         self.calibrate_button = ctk.CTkButton(self.calibrate_voltage_frame, text="Calibrate EIS", command=self.calibrate_experiment)
         self.calibrate_button.pack(side=ctk.LEFT, pady=3, padx=1)
 
@@ -363,12 +364,17 @@ class EISWindow:
 
     # Experiments
     def calibrate_experiment(self):
+        self.progress_bar.set(0)
+        threading.Thread(target=self._threaded_calibrate_experiment, daemon=True).start()
+        
+    def _threaded_calibrate_experiment(self):
         max_freq = int(self.max_freq_slider.get())
         min_freq = int(self.min_freq_slider.get())
         spacing_type = self.spacing_type.get()
         num_steps = int(self.step_size_slider.get())
         voltage = self.voltage.get()
-        calibrate_all(voltage, min_freq, max_freq, self.hardware, self.send_notification, num_steps, spacing_type)
+
+        calibrate_all(voltage, min_freq, max_freq, self.hardware, self.send_notification, num_steps, spacing_type, self.progress_bar)
 
     def start_experiment(self):
         # Disable controls during experiment
