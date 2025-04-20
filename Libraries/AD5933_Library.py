@@ -422,7 +422,9 @@ class AD5933:
         else:
             print('Frequency out of range, setting to 16.776MHz')
             sys_clk = 16.776e6
-        self.set_clock_source('external')  ##DO NOT WANT THIS LINE
+        # clk must be init at internal freq, change to external after 1 adjustment
+        if self.clk == 16.776e6: # 16.776e6 is the internal clk setting
+            self.set_clock_source('external')
         self.clk = sys_clk
         hardware.CLK.Turn_On_Clock(sys_clk)
 
