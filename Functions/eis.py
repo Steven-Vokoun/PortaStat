@@ -368,7 +368,7 @@ def import_calibration_data(voltage, impedance):
 
 def import_all_calibration_data(voltage):
     calibration_data = {}
-    for impedance in ['100', '10000', '100000', '1000000', '10000000']:
+    for impedance in ['10', '100', '10000', '100000', '1000000', '10000000']:
         calibration_data[impedance] = import_calibration_data(voltage, impedance)
     return calibration_data
 
@@ -432,7 +432,7 @@ def import_calibration_data(voltage, impedance):
 
 def import_all_calibration_data(voltage):
     calibration_data = {}
-    for impedance in ['100', '10000', '100000', '1000000', '10000000']:
+    for impedance in ['10, '100', '10000', '100000', '1000000', '10000000']:
         calibration_data[impedance] = import_calibration_data(voltage, impedance)
     return calibration_data
 '''
