@@ -208,13 +208,16 @@ def find_phase_arctan(real, imag):
 
 
 def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, num_steps, spacing_type):
+    """
+    Calibrate all input gain factors
+    """
 
     ## run
     send_notification('Calibrating...')
     send_notification(str(voltage))
     set_output_amplitude(voltage, hardware.sensor, hardware.relays, send_notification)
 
-    impedances = [10e6, 1e6, 100e3, 10e3, 100]
+    impedances = [10e6, 1e6, 100e3, 10e3, 100, 10]
     for impedance in impedances:
         hardware.relays.select_calibration(impedance)
         
