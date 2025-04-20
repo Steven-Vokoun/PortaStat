@@ -355,6 +355,19 @@ class AD5933:
         GainFactors = []
         Sys_Phases = []
 
+        # Adjust theoretical impedance to actual measured impedance
+        Impedance_Coversion = {
+            100: 100.28,
+            1e3: 994.8,
+            10e3: 10_003,
+            50e3: 51_060,
+            100e3: 100_310,
+            500e3: 509_000,
+            1e6: 999_200,
+            10e6: 10_055_000
+        }
+        Impedance = Impedance_Coversion[Impedance]
+
         if spacing_type == 'logarithmic':
             freqs = np.logspace(np.log10(start_freq), np.log10(end_freq), num=num_steps)
         elif spacing_type == 'linear':

@@ -217,9 +217,10 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
     send_notification(str(voltage))
     set_output_amplitude(voltage, hardware.sensor, hardware.relays, send_notification)
 
-    impedances = [10e6, 1e6, 100e3, 10e3, 100, 10]
-    gains = [10, 100, 1e3, 10e3, 100e3, 1e6]
-    tot_len = len(impedances)*len(gains)
+    impedances = [10e6, 1e6, 500e3, 100e3, 50e3, 10e3, 1e3, 100]
+    gains_and_gainfactors = [(10,2), (10,5), (100,2), (100,5), (1e3,2), (1e3,5), (10e3,2), (10e3,5), (100e3,2), (100e3,5), (1e6,2), (1e6,5)]
+    gains_len = len(gains_and_gainfactors)
+    tot_len = len(impedances)*gains_len
 
     for i, impedance in enumerate(impedances):
         hardware.relays.select_calibration(impedance)
@@ -227,13 +228,15 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
         estimated_current = (voltage/1000)/impedance
         estimated_gain = None
 
-        for j, gain in enumerate(gains):
-            if estimated_current * gain * 5 < 1.5:  #~~VCC/2
-                progress_ind = i*len(gains) + (j+1)
+        for j, gains_and_gainfactor in enumerate(gains_and_gainfactors):
+            gain, gain_factor = gains_and_gainfactor
+
+            if _VCC_railing(gain_factor, estimated_current, gain):  #~~VCC/2
+                progress_ind = i*gains_len + (j+1)
                 progress_bar.set( (progress_ind/tot_len) *100)
                 estimated_gain = gain
             else:
-                progress_ind = i*len(gains) + len(gains)
+                progress_ind = i*gains_len + gains_len
                 progress_bar.set( (progress_ind/tot_len) *100)
                 break
         if estimated_gain is None:
@@ -248,6 +251,17 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
 
         send_notification(impedance, newline=False)
     send_notification("Calibration complete")
+
+def _VCC_railing(gain_factor, estimated_current, gain):
+    """
+    Returns truth of vcc railing
+    """
+    if gain_factor == 2:
+        vcc_railing = estimated_current * gain * 2 < 1.4 #~~VCC/2
+    elif gain_factor == 5:
+        vcc_railing = estimated_current * gain * 5 < 1.5 #~~VCC/2
+    return vcc_railing
+
 
 def conduct_experiment(hardware, send_notification, voltage, estimated_impedance, start_freq, end_freq, num_steps = 100, spacing_type='logarithmic', output_location = 'Counter', binary_search = True, progress_bar=None):
     
@@ -368,16 +382,17 @@ def import_calibration_data(voltage, impedance):
 
 def import_all_calibration_data(voltage):
     calibration_data = {}
-    for impedance in ['10', '100', '10000', '100000', '1000000', '10000000']:
+    for impedance in ['100', '1000', '10000', '50000', '100000', '500000', '1000000', '10000000']:
         calibration_data[impedance] = import_calibration_data(voltage, impedance)
     return calibration_data
 
 def find_gain_from_voltage_and_Impedance(voltage, estimated_impedance, send_notification):
     estimated_current = (voltage/1000)/estimated_impedance
     estimated_gain = None
-    gains = [10, 100, 1e3, 10e3, 100e3, 1e6]
-    for gain in gains:
-        if estimated_current * gain * 5 < 1.5:
+    gains_and_gainfactors = [(10,2), (10,5), (100,2), (100,5), (1e3,2), (1e3,5), (10e3,2), (10e3,5), (100e3,2), (100e3,5), (1e6,2), (1e6,5)]
+    for i, gains_and_gainfactor in enumerate(gains_and_gainfactors):
+        gain, gainfactor = gains_and_gainfactor
+        if _VCC_railing(gainfactor, estimated_current, gain):
             estimated_gain = gain
         else:
             break
@@ -390,7 +405,7 @@ def find_gain_from_voltage_and_Impedance(voltage, estimated_impedance, send_noti
 
 def find_impedance_from_voltage_and_gain(voltage, gain, send_notification):
     estimate = (voltage / 1000) * gain * 5 / 1.5
-    impedances = [10, 100, 1e3, 10e3, 100e3, 1e6]
+    impedances = [100, 1e3, 10e3, 50e3, 100e3, 500e3, 1e6, 10e6]
     estimated_impedance = None
     
     for impedance in impedances:
