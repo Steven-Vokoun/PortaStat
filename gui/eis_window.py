@@ -6,7 +6,8 @@ import matplotlib
 import os
 import threading
 import time
-import emoji
+from gui.readme_window import ReadmeWindow
+
 
 from Functions.eis import fit_eis_data, export_to_usb, run_demo_EIS_experiment, calibrate_all, set_output_amplitude, conduct_experiment
 from Libraries.MUX_and_CLK_Library import Relays, LTC6904
@@ -40,6 +41,8 @@ class EISWindow:
         self.show_temp()
 
     def setup_ui(self):
+        # Top toolbar
+        self.setup_toolbar()
         # Experiment settings
         self.setup_calibrate_and_voltage()
         self.setup_freq_and_spacing()
@@ -50,6 +53,29 @@ class EISWindow:
         #Results
         self.setup_plot_and_params()
         self.setup_export_and_notification()
+
+    def setup_toolbar(self):
+        readme_button = ctk.CTkButton(self.toolbar_frame, text="Open README", command=self.open_readme, width=100)
+        readme_button.pack(side=ctk.LEFT, padx=(2,10))
+
+        temp_temperature = 25
+        self.temperature_widget = ctk.CTkLabel(self.toolbar_frame, text=self.show_temp())
+        self.temperature_widget.pack(side=ctk.LEFT, padx=10)
+        self.temperature_widget.configure(corner_radius=8)
+
+        close_button = ctk.CTkButton(self.toolbar_frame, text="Close", command=self.on_close, width=100)
+        close_button.pack(side=ctk.LEFT, padx=(10,2))
+
+    def open_readme(self):
+        if self.current_window:
+            self.current_window.destroy()
+        self.current_window = ReadmeWindow(
+            self.main_frame,
+            on_close_callback=lambda: self.on_selection_change(self.previous_selection)
+        )
+    
+    def on_close(self):
+        os._exit(0)
 
     def setup_hardware(self):
         """Sets up hardware or dummy hardware for Windows"""
@@ -106,71 +132,15 @@ class EISWindow:
     '''
 
     def show_temp(self):
-        # Check if widgets already exist to prevent duplicates
-        if hasattr(self, 'status_frame'):
-            return
-
         self.temperature = 25
         if os.name == 'nt':
             pass
         else:
             self.temperature = self.hardware.sensor.measure_temperature()
             self.hardware.sensor.send_cmd('STANDBY')
-
-        # Create a frame for status indicators
-        self.status_frame = ctk.CTkFrame(self.toolbar_frame)
-        self.status_frame.pack(side=ctk.RIGHT, padx=10)
-
-        # Temperature display
-        self.temp_icon = ctk.CTkLabel(self.status_frame, text=None, image=self.emoji(emoji.emojize(':thumbs_up:'), offset=9))
-        self.temp_icon.pack(side=ctk.LEFT, padx=(10,0))
-
-        self.Temperature_Widget = ctk.CTkLabel(
-            self.status_frame,
-            text=f"{self.temperature}°C",
-            font=("Helvetica", 12)
-        )
-        self.Temperature_Widget.pack(side=ctk.LEFT, padx=(0,5))
-
-        # Separator
-        self.separator = ctk.CTkLabel(self.status_frame, text="|", font=("Helvetica", 14))
-        self.separator.pack(side=ctk.LEFT, padx=5)
-
-        # Battery display
-        self.battery_icon = ctk.CTkLabel(self.status_frame, text=None, image=self.emoji(emoji.emojize(':thumbs_up:')))
-        self.battery_icon.pack(side=ctk.LEFT, padx=(5,0))
-
-        self.battery_widget = ctk.CTkLabel(
-            self.status_frame,
-            text="100%",
-            font=("Helvetica", 12)
-        )
-        self.battery_widget.pack(side=ctk.LEFT, padx=(0,5))
-
-        # Start periodic battery update
-        self.update_battery_level()
-
-    def update_battery_level(self):
-        if os.name == 'nt':
-            # Dummy battery level for Windows testing
-            battery_level = 85
-        else:
-            battery_level = 85#self.hardware.battery_lvl_adc.read_voltage()
-
-        # Update battery icon and text based on level
-        if battery_level >= 0:
-            # Update icon based on battery level
-            if battery_level <= 20:
-                self.battery_icon.configure(image=self.emoji(emoji.emojize(':thumbs_up:')))  # Low battery icon
-            else:
-                self.battery_icon.configure(image=self.emoji(emoji.emojize(':thumbs_up:')))  # Normal battery icon
-
-            self.battery_widget.configure(text=f"{battery_level}%")
-        else:
-            self.battery_widget.configure(text="N/A")
-
-        # Schedule next update in 30 seconds using the root window
-        self.battery_update_id = self.root.after(30000, self.update_battery_level)
+        
+        text=str(self.temperature) + "° C"
+        return text
 
     def setup_plot(self):
         matplotlib.rcParams['font.size'] = 10
@@ -552,11 +522,6 @@ class EISWindow:
         if hasattr(self, 'status_frame'):
             self.status_frame.destroy()
             delattr(self, 'status_frame')
-
-        # Cancel any pending battery updates
-        if hasattr(self, 'battery_update_id'):
-            self.root.after_cancel(self.battery_update_id)
-            delattr(self, 'battery_update_id')
 
     def emoji(self, emoji, offset=0, size=32):
         """

@@ -28,7 +28,6 @@ class MainApplication(ctk.CTk):
 
         # Custom functions
         self.setup_main_frame()
-        self.setup_toolbar()
         self.setup_frames()
         self.on_selection_change("EIS")
 
@@ -38,18 +37,11 @@ class MainApplication(ctk.CTk):
         self.main_frame.pack(fill=ctk.BOTH, expand=True)
         self.readme_text_area = None
 
-    def setup_toolbar(self):
-        """Frame for top row with readme and close buttons"""
+    def setup_frames(self):
+        # frame for open, close, & temp
         self.toolbar_frame = ctk.CTkFrame(self.main_frame)
         self.toolbar_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
 
-        readme_button = ctk.CTkButton(self.toolbar_frame, text="Open README", command=self.open_readme)
-        readme_button.pack(side=ctk.LEFT, padx=10)
-
-        close_button = ctk.CTkButton(self.toolbar_frame, text="Close", command=self.on_close)
-        close_button.pack(side=ctk.RIGHT, padx=10)
-
-    def setup_frames(self):
         # frame for plot
         self.plot_frame = ctk.CTkFrame(self.main_frame)
         self.plot_frame.grid(row=1, column=0, sticky="nsew")
@@ -71,14 +63,6 @@ class MainApplication(ctk.CTk):
             self.current_window.destroy()
         if selection == "EIS":
             self.current_window = EISWindow(self.plot_frame, self.controls_frame, self.button_frame, self.toolbar_frame)
-
-    def open_readme(self):
-        if self.current_window:
-            self.current_window.destroy()
-        self.current_window = ReadmeWindow(
-            self.main_frame,
-            on_close_callback=lambda: self.on_selection_change(self.previous_selection)
-        )
 
     def on_close(self):
         os._exit(0)
