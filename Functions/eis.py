@@ -20,7 +20,7 @@ def run_demo_EIS_experiment(update_data_callback, max_freq, min_freq, spacing_ty
     else:
         frequencies = np.linspace(min_freq, max_freq, num_steps)
     
-    Rs = 1000
+    Rs = 10000
     Rp = 100000
     C = 5E-9
     
@@ -45,16 +45,16 @@ def fit_eis_data(frequencies, real_impedances, imag_impedances, circuit):
     # Define circuit models
     if circuit == 'Series RC':
         circuit_model = 'R0-C1'
-        initial_guess = [150000, 10e-12]
+        initial_guess = [100000, 1e-9]
     elif circuit == 'Parallel RC':
         circuit_model = 'p(R0, C1)'
-        initial_guess = [100000, 5e-12]
+        initial_guess = [100000, 1e-9]
     elif circuit == 'Randles':
-        circuit_model = 'R0-p(C1,R2)'
-        initial_guess = [10000, 5e-12, 100000]
+        circuit_model = 'R0-p(C1,R1)'
+        initial_guess = [10000, 1e-9, 100000]
     elif circuit == 'Randles With CPE':
-        circuit_model = 'R0-p(CPE1,R2)'
-        initial_guess = [10000, 5e-12, 0.9, 100000]
+        circuit_model = 'R0-p(CPE1,R1)'
+        initial_guess = [10000, 1e-9, 0.9, 100000]
     else:
         raise ValueError(f"Unknown circuit type: {circuit}")
     circuit = CustomCircuit(initial_guess=initial_guess, circuit=circuit_model)

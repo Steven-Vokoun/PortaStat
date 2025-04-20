@@ -102,7 +102,7 @@ class AD5933:
         self.set_clock_source(clk_source)
         self.set_pga_gain(PGA_Gain)
         self.set_increment_number(0)
-        self.set_settling_time_cycles(500)
+        self.set_settling_time_cycles(1000)
 
     # I2C Functions
     def write_register(self, reg, value):
@@ -291,8 +291,8 @@ class AD5933:
             self.run_freq_sweep(freqs[0])
         for freq in freqs:
             self.clk_adjustment(hardware, freq)
-            _,_ = self.run_freq_sweep(freq)
-            _,_ = self.run_freq_sweep(freq)
+            #_,_ = self.run_freq_sweep(freq)
+            #_,_ = self.run_freq_sweep(freq)
             real, imag = self.run_freq_sweep(freq)
             real_data.append(real)
             imag_data.append(imag)
@@ -363,17 +363,17 @@ class AD5933:
             raise ValueError('Invalid Frequency Spacing Type')
         #Repeat first data point 3 times to get the lowpass filter to settle
         self.clk_adjustment(hardware, freqs[0])
-        for i in range(3):
-            self.run_freq_sweep(freqs[0])
+        self.run_freq_sweep(freqs[0])
         #Run rest of the sweep
         for freq in freqs:
             self.clk_adjustment(hardware, freq)
-            _, _ = self.Calibrate_Single_Point(Impedance, freq)
-            gf1, sys_phase1 = self.Calibrate_Single_Point(Impedance, freq)
-            gf2, sys_phase2 = self.Calibrate_Single_Point(Impedance, freq)
-            gf3, sys_phase3 = self.Calibrate_Single_Point(Impedance, freq)
-            gf = (gf1 + gf2 + gf3) / 3
-            sys_phase = (sys_phase1 + sys_phase2 + sys_phase3) / 3
+            gf, sys_phase = self.Calibrate_Single_Point(Impedance, freq)
+            ## MULTIPLE SWEEPS FOR BETTER ACCURACY
+            #gf1, sys_phase1 = self.Calibrate_Single_Point(Impedance, freq)
+            #gf2, sys_phase2 = self.Calibrate_Single_Point(Impedance, freq)
+            #gf3, sys_phase3 = self.Calibrate_Single_Point(Impedance, freq)
+            #gf = (gf1 + gf2 + gf3) / 3
+            #sys_phase = (sys_phase1 + sys_phase2 + sys_phase3) / 3
             GainFactors.append(gf)
             Sys_Phases.append(sys_phase)
         #self.export_calibration_data(freqs, GainFactors, Sys_Phases) #########
@@ -404,12 +404,25 @@ class AD5933:
 
         # LTC6904 min is 1khz -> 68khz
         # theoretical limit is .5hz
-        if frequency < 10e3:
-            sys_clk = frequency * 1000
-            self.set_clock_source('external')
+        
+        if frequency <= 20 and frequency >= 10:
+            sys_clk = 25e3
+        elif frequency > 20 and frequency <= 30:
+            sys_clk = 50e3
+        elif frequency > 30 and frequency <= 100:
+            sys_clk = 100e3
+        elif frequency > 100 and frequency <= 200:
+            sys_clk = 250e3
+        elif frequency > 200 and frequency <= 300:
+            sys_clk = 1e6
+        elif frequency > 300 and frequency <= 1000:
+            sys_clk = 2e6
+        elif frequency > 1000 and frequency <= 5000:
+            sys_clk = 4e6
         else:
+            print('Frequency out of range, setting to 16.776MHz')
             sys_clk = 16.776e6
-            self.set_clock_source('internal')
+        self.set_clock_source('external')  ##DO NOT WANT THIS LINE
         self.clk = sys_clk
         hardware.CLK.Turn_On_Clock(sys_clk)
 

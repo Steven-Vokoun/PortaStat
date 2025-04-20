@@ -55,10 +55,12 @@ class LTC6904:
         self.bus.write_byte_data(self.LTC6904_ADDRESS, MS, LS)
 
     def Turn_On_Clock(self, frequency):
-        OCT = int(3.322 * np.log10(frequency / 1039))
-        DAC = 2048 - int((2078 * (2 ** (10+OCT))) / frequency)
-        MS = OCT << 4 | DAC >> 4
-        LS = DAC << 4 | self.LTC6904_CLK_ON_CLK_INV_OFF
+        OCT = int(3.322 * np.log10(frequency / 1039)) & 0xF #4 bit mask
+        DAC = int(2048 - ((2078 * (2 ** (10+OCT))) / frequency)) & 0x3FF #10 bit mask
+        #OCT[3:0] then DAC[9:6]
+        MS = OCT << 4 | DAC >> 6
+        #DAC[5:0] then CLK_ON_CLK_INV_OFF[1:0]
+        LS = ((DAC & 0x3F) << 2) | self.LTC6904_CLK_ON_CLK_INV_OFF
         self.write_registers(MS, LS)
 
     def Turn_Off_Clock(self):
