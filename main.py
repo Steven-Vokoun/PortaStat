@@ -40,7 +40,7 @@ class MainApplication(ctk.CTk):
     def setup_frames(self):
         # frame for open, close, & temp
         self.toolbar_frame = ctk.CTkFrame(self.main_frame)
-        self.toolbar_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
+        self.toolbar_frame.grid(row=0, column=0, sticky="ew")
 
         # frame for plot
         self.plot_frame = ctk.CTkFrame(self.main_frame)
@@ -48,14 +48,18 @@ class MainApplication(ctk.CTk):
 
         # frame for: experiment settings, analysis settings, experimental control, & results
         self.controls_frame = ctk.CTkFrame(self.main_frame)
-        self.controls_frame.grid(row=1, column=1, sticky="nsew")
+        self.controls_frame.grid(row=0, column=1, sticky="nsew", rowspan=2)
 
         # frame for plot types
         self.button_frame = ctk.CTkFrame(self.main_frame)
         self.button_frame.grid(row=2, column=0, columnspan=2, sticky="ew")
 
+        # Configure grid weights
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.main_frame.grid_columnconfigure(1, weight=1)
+        self.main_frame.grid_rowconfigure(0, weight=0)  # toolbar row
+        self.main_frame.grid_rowconfigure(1, weight=1)  # plot row
+        self.main_frame.grid_rowconfigure(2, weight=0)  # button row
 
     def on_selection_change(self, selection):
         self.previous_selection = selection

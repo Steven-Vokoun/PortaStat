@@ -24,7 +24,7 @@ class EISWindow:
 
         self.spacing_type = ctk.StringVar(value="logarithmic")
         self.circuit_type = ctk.StringVar(value="Series RC")
-        self.voltage = ctk.IntVar(value=1000)
+        self.voltage = 1_000
         self.output_location = ctk.StringVar(value="100k")
         self.binary_search = ctk.BooleanVar(value=True)
 
@@ -58,13 +58,12 @@ class EISWindow:
         readme_button = ctk.CTkButton(self.toolbar_frame, text="Open README", command=self.open_readme, width=100)
         readme_button.pack(side=ctk.LEFT, padx=(2,10))
 
-        temp_temperature = 25
         self.temperature_widget = ctk.CTkLabel(self.toolbar_frame, text=self.show_temp())
-        self.temperature_widget.pack(side=ctk.LEFT, padx=10)
+        self.temperature_widget.pack(side=ctk.LEFT, padx=50)
         self.temperature_widget.configure(corner_radius=8)
 
         close_button = ctk.CTkButton(self.toolbar_frame, text="Close", command=self.on_close, width=100)
-        close_button.pack(side=ctk.LEFT, padx=(10,2))
+        close_button.pack(side=ctk.RIGHT, padx=(10,2), pady=2)
 
     def open_readme(self):
         if self.current_window:
@@ -155,20 +154,31 @@ class EISWindow:
 
 
         self.calibrate_button = ctk.CTkButton(self.calibrate_voltage_frame, text="Calibrate EIS", command=self.calibrate_experiment)
-        self.calibrate_button.pack(side=ctk.LEFT, pady=3, padx=1)
+        self.calibrate_button.pack(fill="both", expand=True)
 
-        self.voltage_label = ctk.CTkLabel(self.calibrate_voltage_frame, text="Voltage (mV): ")
-        self.voltage_label.pack(side=ctk.LEFT, padx=5)
-        voltage_values = ["2", "4", "10", "20", "40", "50", "100", "150", "200", "300", "400", "500", "750", "1000", "1500", "2000"]
-        self.voltage_dropdown = ctk.CTkComboBox(self.calibrate_voltage_frame, variable=self.voltage, values=voltage_values, command=self.update_voltage)
-        self.voltage_dropdown.pack(side=ctk.LEFT, padx=1)
-
-        #self.Temporary_Test_Button = ctk.CTkButton(self.calibrate_voltage_frame, text="Temporary Test", command=self.Temporary_Test)
-        #self.Temporary_Test_Button.pack(side=ctk.LEFT, pady=3, padx=10)
+    def _voltage(self):
+        return self.voltage
 
     def setup_freq_and_spacing(self):
         self.freq_frame = ctk.CTkFrame(self.controls_frame)
         self.freq_frame.pack(pady=3, padx=5, anchor="n", fill=ctk.X)
+
+        #voltage
+        #self.voltage_label = ctk.CTkLabel(self.calibrate_voltage_frame, text="Voltage (mV): ")
+        #self.voltage_label.pack(side=ctk.LEFT, padx=5)
+        self.slider_voltage_values = ["2", "4", "10", "20", "40", "50", "100", "150", "200", "300", "400", "500", "750", "1000", "1500", "2000"]
+        #self.voltage_dropdown = ctk.CTkComboBox(self.calibrate_voltage_frame, variable=self.voltage, values=voltage_values, command=self.update_voltage)
+        #self.voltage_dropdown.pack(side=ctk.LEFT, padx=1)
+        # Voltage Slider
+        self.voltage_frame = ctk.CTkFrame(self.freq_frame, width=300)
+        self.voltage_frame.pack(fill=ctk.X)
+        self.voltage_frame_label = ctk.CTkLabel(self.voltage_frame, text="Voltage (mV):")
+        self.voltage_frame_label.pack(side=ctk.LEFT, padx=5)
+        self.voltage_slider = ctk.CTkSlider(self.voltage_frame, from_=0, to=len(self.slider_voltage_values) - 1, command=self.update_voltage)
+        self.voltage_slider.set(len(self.slider_voltage_values) - 1)
+        self.voltage_slider.pack(side=ctk.LEFT, padx=5, fill=ctk.X, expand=True)
+        self.voltage_value_slider = ctk.CTkLabel(self.voltage_frame, text=f"{self._voltage()}", width=50)
+        self.voltage_value_slider.pack(side=ctk.LEFT, padx=2)
 
         # Min Frequency
         self.min_freq_frame = ctk.CTkFrame(self.freq_frame, width=300)
@@ -329,8 +339,10 @@ class EISWindow:
         else:
             export_to_usb(self.send_notification, self.freq_data, self.real_data, self.imag_data)
 
-    def update_voltage(self, why):
-        set_output_amplitude(self.voltage.get(), self.hardware.sensor, self.hardware.relays, self.send_notification)
+    def update_voltage(self, array_ind) -> None:
+        self.voltage = self.slider_voltage_values[int(array_ind)]
+        self.voltage_value_slider.configure(text=f"{self.voltage}")
+        set_output_amplitude(self.voltage, self.hardware.sensor, self.hardware.relays, self.send_notification)
 
     # Experiments
     def calibrate_experiment(self):
@@ -342,7 +354,7 @@ class EISWindow:
         min_freq = int(self.min_freq_slider.get())
         spacing_type = self.spacing_type.get()
         num_steps = int(self.step_size_slider.get())
-        voltage = self.voltage.get()
+        voltage = self.voltage
 
         calibrate_all(voltage, min_freq, max_freq, self.hardware, self.send_notification, num_steps, spacing_type, self.progress_bar)
 
@@ -374,7 +386,7 @@ class EISWindow:
                 min_freq = int(self.min_freq_slider.get())
                 spacing_type = self.spacing_type.get()
                 num_steps = int(self.step_size_slider.get())
-                voltage = self.voltage.get()
+                voltage = self.voltage
                 estimated_impedance = self.impedance_slider.get()
                 output_location = self.output_location.get()
                 binary_search = self.binary_search.get()
