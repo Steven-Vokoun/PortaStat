@@ -134,6 +134,10 @@ class EISWindow:
         self.figure.subplots_adjust(left=0.2)
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.plot_frame)
         self.canvas.get_tk_widget().pack(fill=ctk.BOTH, expand=True)
+        
+        # Make sure plot is always square
+        #self.ax.set_aspect('equal', adjustable='box')
+        self.ax.set_box_aspect(1)  # keeps plot visually square
 
     def setup_calibrate_and_voltage(self):
         self.calibrate_voltage_frame = ctk.CTkFrame(self.controls_frame, fg_color="transparent")
@@ -517,7 +521,7 @@ class EISWindow:
         self.ax.set_yscale("log")
         self.ax.set_xlabel("Log Frequency")
         self.ax.set_ylabel("Log Magnitude")
-        self.ax.set_title("Magnitude vs Frequency")
+        self.ax.set_title("Log Magnitude vs Log Frequency")
         self.canvas.draw()
 
     def clear_frame(self, frame):
