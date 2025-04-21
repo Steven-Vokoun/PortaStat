@@ -217,7 +217,8 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
     send_notification(str(voltage))
     set_output_amplitude(voltage, hardware.sensor, hardware.relays, send_notification)
 
-    impedances = [10e6, 1e6, 500e3, 100e3, 50e3, 10e3, 1e3, 100]
+    # Use exact integer values that match the dictionary keys
+    impedances = [int(10e6), int(1e6), 500_000, 100_000, 50_000, 10_000, 1_000, 100]
     gains_and_gainfactors = [(10,2), (10,5), (100,2), (100,5), (1e3,2), (1e3,5), (10e3,2), (10e3,5), (100e3,2), (100e3,5), (1e6,2), (1e6,5)]
     gains_len = len(gains_and_gainfactors)
     tot_len = len(impedances)*gains_len

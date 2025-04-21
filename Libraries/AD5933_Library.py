@@ -355,17 +355,23 @@ class AD5933:
         GainFactors = []
         Sys_Phases = []
 
-        # Adjust theoretical impedance to actual measured impedance
+        # Adjust theoretical impedance to actual measured impedance using integer keys
         Impedance_Coversion = {
             100: 100.28,
-            1e3: 994.8,
-            10e3: 10_003,
-            50e3: 51_060,
-            100e3: 100_310,
-            500e3: 509_000,
-            1e6: 999_200,
-            10e6: 10_055_000
+            1_000: 994.8,
+            10_000: 10_003,
+            50_000: 51_060,
+            100_000: 100_310,
+            500_000: 509_000,
+            1_000_000: 999_200,
+            10_000_000: 10_055_000
         }
+        
+        # Convert any floating point impedance to integer for dictionary lookup
+        Impedance = int(Impedance)
+        if Impedance not in Impedance_Coversion:
+            raise ValueError(f"Invalid impedance value: {Impedance}. Must be one of {list(Impedance_Coversion.keys())}")
+            
         Impedance = Impedance_Coversion[Impedance]
 
         if spacing_type == 'logarithmic':
