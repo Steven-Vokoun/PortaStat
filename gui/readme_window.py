@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from gui.markdown import RichText
+import os
 
 class ReadmeWindow(ctk.CTkFrame):
     """
@@ -56,7 +57,8 @@ class ReadmeWindow(ctk.CTkFrame):
 
     def load_readme_content(self):
         try:
-            with open("README.md", "r") as file:
+            readme_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "README.md")
+            with open(readme_path, "r") as file:
                 content = file.read()
             # Parse and insert the markdown content
             self.parse_and_insert_markdown(content)
