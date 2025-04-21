@@ -220,37 +220,37 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
     # Use exact integer values that match the dictionary keys
     impedances = [int(10e6), int(1e6), 500_000, 100_000, 50_000, 10_000, 1_000, 100]
     gains_and_gainfactors = [(10,2), (10,5), (100,2), (100,5), (1e3,2), (1e3,5), (10e3,2), (10e3,5), (100e3,2), (100e3,5), (1e6,2), (1e6,5)]
-    gains_len = len(gains_and_gainfactors)
-    tot_len = len(impedances)*gains_len
+    
+    # Calculate total steps for progress bar - only count gain factor tests
+    total_steps = len(impedances) * len(gains_and_gainfactors)
+    current_step = 0
 
-    for i, impedance in enumerate(impedances):
+    for impedance in impedances:
         hardware.relays.select_calibration(impedance)
         
         estimated_current = (voltage/1000)/impedance
         estimated_gain = None
 
-        for j, gains_and_gainfactor in enumerate(gains_and_gainfactors):
+        # Update progress for gain factor tests
+        for gains_and_gainfactor in gains_and_gainfactors:
             gain, gain_factor = gains_and_gainfactor
+            current_step += 1
+            progress_bar.set((current_step/total_steps) * 100)
 
-            if _VCC_railing(gain_factor, estimated_current, gain):  #~~VCC/2
-                progress_ind = i*gains_len + (j+1)
-                progress_bar.set( (progress_ind/tot_len) *100)
+            if _VCC_railing(gain_factor, estimated_current, gain):  
                 estimated_gain = gain
             else:
-                progress_ind = i*gains_len + gains_len
-                progress_bar.set( (progress_ind/tot_len) *100)
                 break
+
         if estimated_gain is None:
             send_notification("Unable to find suitable gain setting")
         hardware.relays.set_input_gain(estimated_gain)
-
         
+        # Perform frequency sweep without updating progress
         freqs, GainFactors, Sys_Phases = hardware.sensor.Calibration_Sweep(impedance, start_freq, end_freq, num_steps, hardware, spacing_type)
-
-
         export_calibration_data(freqs, GainFactors, Sys_Phases, voltage, int(impedance))
+        send_notification(str(impedance), newline=False)
 
-        send_notification(impedance, newline=False)
     send_notification("Calibration complete")
 
 def _VCC_railing(gain_factor, estimated_current, gain):
@@ -348,15 +348,24 @@ def conduct_binary_search_experiment(hardware, send_notification, voltage, imped
     for _ in range(5):
         real_temp, imag_temp = hardware.sensor.run_freq_sweep(freqs[0])
 
+    # Calculate update interval (10% increments)
+    update_interval = max(1, len(freqs) // 10)
+
     # Loop through each frequency
     for i, freq in enumerate(freqs):
-        progress_bar.set( ((i+1)/len(freqs)) *100)
+        # Update progress bar every 10% of total steps
+        if i % update_interval == 0:
+            progress_bar.set((i/len(freqs)) * 100)
+            
         impedance, real_adjusted, imag_adjusted, Phase = binary_search_gain(
             hardware, send_notification, voltage, impedance, freq, calibration_data)
         real_results[i] = real_adjusted
         imag_results[i] = imag_adjusted
         phase_results[i] = Phase
 
+    # Ensure progress bar reaches 100%
+    progress_bar.set(100)
+    
     return freqs, real_results, imag_results, phase_results
 
 def export_calibration_data(freqs, gain_factors, sys_phases, voltage, Impedance):
