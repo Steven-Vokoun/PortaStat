@@ -27,8 +27,8 @@ class EISWindow:
         self.spacing_type = ctk.StringVar(value="logarithmic")
         self.scan_speed = ctk.StringVar(value="fast")
         self.circuit_type = ctk.StringVar(value="Series RC")
-        self.voltage = 1_000
-        self.output_location = ctk.StringVar(value="100k")
+        self.voltage = 2_000
+        self.output_location = ctk.StringVar(value="Counter")
         self.binary_search = ctk.BooleanVar(value=True)
 
         self.freq_data = None
@@ -130,7 +130,7 @@ class EISWindow:
 
     def setup_plot(self):
         matplotlib.rcParams['font.size'] = 10
-        self.figure, self.ax = plt.subplots(figsize=(4, 3))
+        self.figure, self.ax = plt.subplots(figsize=(4, 4))
         self.figure.subplots_adjust(left=0.2)
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.plot_frame)
         self.canvas.get_tk_widget().pack(fill=ctk.BOTH, expand=True)
