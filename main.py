@@ -18,10 +18,19 @@ class MainApplication(ctk.CTk):
 
         # Window setup w/built-in functionality
         self.title("Experiment GUI")
+        # Set default geometry as fallback
         self.geometry("800x480")
         self._set_appearance_mode("dark")
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
+        # Set fullscreen mode
+        self.fullscreen = os.name != 'nt'  # True if not on Windows
+        if self.fullscreen:
+            self.attributes('-fullscreen', True)
+        
+        # Bind Escape key to toggle fullscreen
+        self.bind('<Escape>', self.toggle_fullscreen)
+        
         # Custom variables
         self.current_window = None
         self.previous_selection = "EIS"
@@ -30,6 +39,13 @@ class MainApplication(ctk.CTk):
         self.setup_main_frame()
         self.setup_frames()
         self.on_selection_change("EIS")
+
+    def toggle_fullscreen(self, event=None):
+        if os.name != 'nt':  # Only on Raspberry Pi
+            self.fullscreen = not self.fullscreen
+            self.attributes('-fullscreen', self.fullscreen)
+            if not self.fullscreen:
+                self.geometry("800x480")
 
     def setup_main_frame(self):
         """Main frame is an empty widget to place all other widgets within"""
