@@ -163,12 +163,8 @@ class EISWindow:
         self.freq_frame = ctk.CTkFrame(self.controls_frame)
         self.freq_frame.pack(pady=3, padx=5, anchor="n", fill=ctk.X)
 
-        #voltage
-        #self.voltage_label = ctk.CTkLabel(self.calibrate_voltage_frame, text="Voltage (mV): ")
-        #self.voltage_label.pack(side=ctk.LEFT, padx=5)
-        self.slider_voltage_values = ["2", "4", "10", "20", "40", "50", "100", "150", "200", "300", "400", "500", "750", "1000", "1500", "2000"]
-        #self.voltage_dropdown = ctk.CTkComboBox(self.calibrate_voltage_frame, variable=self.voltage, values=voltage_values, command=self.update_voltage)
-        #self.voltage_dropdown.pack(side=ctk.LEFT, padx=1)
+        self.slider_voltage_values = [2, 4, 10, 20, 40, 50, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000]
+
         # Voltage Slider
         self.voltage_frame = ctk.CTkFrame(self.freq_frame, width=300)
         self.voltage_frame.pack(fill=ctk.X)
