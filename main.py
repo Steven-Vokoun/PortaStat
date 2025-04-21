@@ -39,19 +39,29 @@ class MainApplication(ctk.CTk):
 
     def setup_frames(self):
         # frame for open, close, & temp
-        self.toolbar_frame = ctk.CTkFrame(self.main_frame)
+        self.toolbar_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
         self.toolbar_frame.grid(row=0, column=0, sticky="ew")
+        
+        readme_button = ctk.CTkButton(self.toolbar_frame, text="Open README", command=self.open_readme, width=100)
+        readme_button.pack(side=ctk.LEFT, padx=(2,10))
+
+        self.temperature_widget = ctk.CTkLabel(self.toolbar_frame, text='25 °C')
+        self.temperature_widget.pack(side=ctk.LEFT, padx=50)
+        self.temperature_widget.configure(corner_radius=8)
+
+        close_button = ctk.CTkButton(self.toolbar_frame, text="Close", command=self.on_close, width=100)
+        close_button.pack(side=ctk.RIGHT, padx=(10,2), pady=2)
 
         # frame for plot
         self.plot_frame = ctk.CTkFrame(self.main_frame)
         self.plot_frame.grid(row=1, column=0, sticky="nsew")
 
         # frame for: experiment settings, analysis settings, experimental control, & results
-        self.controls_frame = ctk.CTkFrame(self.main_frame)
+        self.controls_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
         self.controls_frame.grid(row=0, column=1, sticky="nsew", rowspan=2)
 
         # frame for plot types
-        self.button_frame = ctk.CTkFrame(self.main_frame)
+        self.button_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
         self.button_frame.grid(row=2, column=0, columnspan=2, sticky="ew")
 
         # Configure grid weights
@@ -61,12 +71,20 @@ class MainApplication(ctk.CTk):
         self.main_frame.grid_rowconfigure(1, weight=1)  # plot row
         self.main_frame.grid_rowconfigure(2, weight=0)  # button row
 
+    def open_readme(self):
+        if self.current_window:
+            self.current_window.destroy()
+        self.current_window = ReadmeWindow(
+            self.main_frame,
+            on_close_callback=lambda: self.on_selection_change(self.previous_selection)
+        )
+
     def on_selection_change(self, selection):
         self.previous_selection = selection
         if self.current_window:
             self.current_window.destroy()
         if selection == "EIS":
-            self.current_window = EISWindow(self.plot_frame, self.controls_frame, self.button_frame, self.toolbar_frame)
+            self.current_window = EISWindow(self.plot_frame, self.controls_frame, self.button_frame, self.toolbar_frame, self.temperature_widget)
 
     def on_close(self):
         os._exit(0)
