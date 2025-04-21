@@ -130,14 +130,14 @@ class EISWindow:
 
     def setup_plot(self):
         matplotlib.rcParams['font.size'] = 10
-        self.figure, self.ax = plt.subplots(figsize=(4, 4))
+        self.figure, self.ax = plt.subplots(figsize=(5, 5))
         self.figure.subplots_adjust(left=0.2)
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.plot_frame)
         self.canvas.get_tk_widget().pack(fill=ctk.BOTH, expand=True)
         
         # Make sure plot is always square
         #self.ax.set_aspect('equal', adjustable='box')
-        self.ax.set_box_aspect(1)  # keeps plot visually square
+        #self.ax.set_box_aspect(1)  # keeps plot visually square
 
     def setup_calibrate_and_voltage(self):
         self.calibrate_voltage_frame = ctk.CTkFrame(self.controls_frame, fg_color="transparent")
@@ -157,9 +157,9 @@ class EISWindow:
         self.slider_voltage_values = [2, 4, 10, 20, 40, 50, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000]
 
         # Voltage Slider
-        self.voltage_frame = ctk.CTkFrame(self.freq_frame, width=300, corner_radius=0, fg_color="transparent")
+        self.voltage_frame = ctk.CTkFrame(self.freq_frame, width=250, corner_radius=0, fg_color="transparent")
         self.voltage_frame.pack(fill=ctk.X)
-        self.voltage_frame_label = ctk.CTkLabel(self.voltage_frame, text="Voltage (mV):               ")
+        self.voltage_frame_label = ctk.CTkLabel(self.voltage_frame, text="Voltage (mV):")
         self.voltage_frame_label.pack(side=ctk.LEFT, padx=5)
         self.voltage_slider = ctk.CTkSlider(self.voltage_frame, from_=0, to=len(self.slider_voltage_values) - 1, command=self.update_voltage)
         self.voltage_slider.set(len(self.slider_voltage_values) - 1)
@@ -168,9 +168,9 @@ class EISWindow:
         self.voltage_value_slider.pack(side=ctk.LEFT, padx=2)
 
         # Min Frequency
-        self.min_freq_frame = ctk.CTkFrame(self.freq_frame, width=300, corner_radius=0, fg_color="transparent")
+        self.min_freq_frame = ctk.CTkFrame(self.freq_frame, width=250, corner_radius=0, fg_color="transparent")
         self.min_freq_frame.pack(fill=ctk.X)
-        self.min_freq_label = ctk.CTkLabel(self.min_freq_frame, text="Min Frequency:            ")
+        self.min_freq_label = ctk.CTkLabel(self.min_freq_frame, text="Min Frequency:")
         self.min_freq_label.pack(side=ctk.LEFT, padx=5)
         self.min_freq_slider = ctk.CTkSlider(self.min_freq_frame, from_=10, to=20000, command=self.update_min_freq_label)
         self.min_freq_slider.set(5000)
@@ -179,9 +179,9 @@ class EISWindow:
         self.min_freq_value_label.pack(side=ctk.LEFT, padx=2)
 
         # Max Frequency
-        self.max_freq_frame = ctk.CTkFrame(self.freq_frame, width=300, corner_radius=0, fg_color="transparent")
+        self.max_freq_frame = ctk.CTkFrame(self.freq_frame, width=250, corner_radius=0, fg_color="transparent")
         self.max_freq_frame.pack(fill=ctk.X)
-        self.max_freq_label = ctk.CTkLabel(self.max_freq_frame, text="Max Frequency:           ")
+        self.max_freq_label = ctk.CTkLabel(self.max_freq_frame, text="Max Frequency:")
         self.max_freq_label.pack(side=ctk.LEFT, padx=5)
         self.max_freq_slider = ctk.CTkSlider(self.max_freq_frame, from_=25000, to=200000, command=self.update_max_freq_label)
         self.max_freq_slider.set(100000)
@@ -190,9 +190,9 @@ class EISWindow:
         self.max_freq_value_label.pack(side=ctk.LEFT, padx=2)
 
         # Step Size
-        self.step_size_frame = ctk.CTkFrame(self.freq_frame, width=300, corner_radius=0, fg_color="transparent")
+        self.step_size_frame = ctk.CTkFrame(self.freq_frame, width=250, corner_radius=0, fg_color="transparent")
         self.step_size_frame.pack(fill=ctk.X)
-        self.step_size_label = ctk.CTkLabel(self.step_size_frame, text="Number Of Steps:        ")
+        self.step_size_label = ctk.CTkLabel(self.step_size_frame, text="Number Of Steps:")
         self.step_size_label.pack(side=ctk.LEFT, padx=5)
         self.step_size_slider = ctk.CTkSlider(self.step_size_frame, from_=10, to=1000, command=self.update_step_size_label)
         self.step_size_slider.set(50)
@@ -201,9 +201,9 @@ class EISWindow:
         self.step_size_value_label.pack(side=ctk.LEFT, padx=2)
 
         # Estimated Impedance
-        self.impedance_frame = ctk.CTkFrame(self.freq_frame, width=300, corner_radius=0, fg_color="transparent")
+        self.impedance_frame = ctk.CTkFrame(self.freq_frame, width=250, corner_radius=0, fg_color="transparent")
         self.impedance_frame.pack(fill=ctk.X)
-        self.impedance_label = ctk.CTkLabel(self.impedance_frame, text="Estimated Impedance:")
+        self.impedance_label = ctk.CTkLabel(self.impedance_frame, text="Approx. Imped.:")
         self.impedance_label.pack(side=ctk.LEFT, padx=5)
         self.impedance_slider = ctk.CTkSlider(self.impedance_frame, from_=0, to=5, command=self.update_impedance_label)
         self.impedance_slider.set(4)
@@ -224,19 +224,19 @@ class EISWindow:
         self.sweep_frame.pack(side=ctk.LEFT, expand=True, padx=(0, 5))
 
         self.spacing_type_label = ctk.CTkLabel(self.sweep_frame, text="Sweep: ")
-        self.spacing_type_label.pack(side=ctk.LEFT, padx=(5,15))
+        self.spacing_type_label.pack(side=ctk.LEFT, padx=(2,10))
 
-        self.logarithmic_radio = ctk.CTkRadioButton(self.sweep_frame, text="Logarithmic", variable=self.spacing_type, value="logarithmic")
-        self.logarithmic_radio.pack(side=ctk.LEFT, padx=(0,5))
+        self.logarithmic_radio = ctk.CTkRadioButton(self.sweep_frame, text="Log", variable=self.spacing_type, value="logarithmic", width = 75)
+        self.logarithmic_radio.pack(side=ctk.LEFT)
 
-        self.linear_radio = ctk.CTkRadioButton(self.sweep_frame, text="Linear", variable=self.spacing_type, value="linear")
-        self.linear_radio.pack(side=ctk.LEFT, padx=(0))
+        self.linear_radio = ctk.CTkRadioButton(self.sweep_frame, text="Linear", variable=self.spacing_type, value="linear", width = 75)
+        self.linear_radio.pack(side=ctk.LEFT)
 
-        self.slow_radio = ctk.CTkRadioButton(self.radio_container, text="Slow", variable=self.scan_speed, value="slow")
-        self.slow_radio.pack(side=ctk.RIGHT)
+        self.slow_radio = ctk.CTkRadioButton(self.radio_container, text="Slow", variable=self.scan_speed, value="slow", width = 75)
+        self.slow_radio.pack(side=ctk.LEFT)
 
-        self.fast_radio = ctk.CTkRadioButton(self.radio_container, text="Fast", variable=self.scan_speed, value="fast")
-        self.fast_radio.pack(side=ctk.RIGHT, padx=(0,0))
+        self.fast_radio = ctk.CTkRadioButton(self.radio_container, text="Fast", variable=self.scan_speed, value="fast", width = 75)
+        self.fast_radio.pack(side=ctk.LEFT)
 
     def update_min_freq_label(self, value):
         step_value = round(float(value) / 100) * 100
@@ -267,7 +267,7 @@ class EISWindow:
         self.start_button.pack(side=ctk.LEFT, pady=3, padx=3, fill=ctk.X)
 
         locations = ['Counter', 'Randles', '100', '1k', '10k', '50k', '100k', '500k', '1Meg', '10Meg']
-        self.output_location_dropdown = ctk.CTkComboBox(self.start_fitting_frame, variable=self.output_location, values=locations)
+        self.output_location_dropdown = ctk.CTkComboBox(self.start_fitting_frame, variable=self.output_location, values=locations, width = 100)
         self.output_location_dropdown.pack(side=ctk.LEFT, pady=3, padx=3, fill=ctk.X)
 
         self.binary_search_checkbox = ctk.CTkCheckBox(self.start_fitting_frame, variable = self.binary_search, text="Auto Gain")
@@ -323,7 +323,7 @@ class EISWindow:
 
         self.notification_box = ctk.CTkTextbox(self.export_frame, height=70, width=275)
         self.notification_box.pack(side=ctk.LEFT, padx=2)
-        self.notification_box.insert(ctk.END, "Welcome! Please calibrate your device.")
+        self.notification_box.insert(ctk.END, "Welcome! Please calibrate.")
 
         # Create a separate frame for progress bar
         self.progress_frame = ctk.CTkFrame(self.controls_frame, fg_color="transparent")
