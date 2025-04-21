@@ -23,13 +23,13 @@ class ReadmeWindow(ctk.CTkFrame):
         self.load_readme_content()
 
     def configure_frame(self):
-        self.grid(row=1, column=0, columnspan=2, rowspan=2, sticky="nsew")
+        self.grid(row=0, column=0, columnspan=2, rowspan=2, sticky="nsew")
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
     def create_widgets(self):
         # Frame for README text with scroll
-        self.readme_frame = ctk.CTkFrame(self)
+        self.readme_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.readme_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
         self.readme_frame.grid_columnconfigure(0, weight=1)
         self.readme_frame.grid_rowconfigure(0, weight=1)
@@ -38,7 +38,7 @@ class ReadmeWindow(ctk.CTkFrame):
         default_font = ctk.CTkFont(family="TkDefaultFont", size=12)
 
         # Create a scrollable frame container
-        self.scrollable_frame = ctk.CTkScrollableFrame(self.readme_frame)
+        self.scrollable_frame = ctk.CTkScrollableFrame(self.readme_frame, fg_color="transparent")
         self.scrollable_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
 
