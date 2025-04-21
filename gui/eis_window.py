@@ -39,8 +39,8 @@ class EISWindow:
         self.real_fit_data = None
         self.imag_fit_data = None
 
-        self.setup_ui()
         self.setup_hardware()
+        self.setup_ui()
         self.show_temp()
 
     def setup_ui(self):
