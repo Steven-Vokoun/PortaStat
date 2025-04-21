@@ -28,9 +28,8 @@ class ReadmeWindow(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
 
     def create_widgets(self):
-        # Frame for README text - remove padding from constructor
+        # Frame for README text with scroll
         self.readme_frame = ctk.CTkFrame(self)
-        # Apply padding after creation using grid
         self.readme_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
         self.readme_frame.grid_columnconfigure(0, weight=1)
         self.readme_frame.grid_rowconfigure(0, weight=1)
@@ -38,22 +37,34 @@ class ReadmeWindow(ctk.CTkFrame):
         # Create and configure the default font
         default_font = ctk.CTkFont(family="TkDefaultFont", size=12)
 
+        # Create a scrollable frame container
+        self.scrollable_frame = ctk.CTkScrollableFrame(self.readme_frame)
+        self.scrollable_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        self.scrollable_frame.grid_columnconfigure(0, weight=1)
+
         # Text area for the README content using RichText
         self.readme_text_area = RichText(
-            self.readme_frame,
+            self.scrollable_frame,
             wrap=ctk.WORD,
-            font=default_font
+            font=default_font,
+            height=300,  # Set a default height
         )
-        self.readme_text_area.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        self.readme_text_area.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
 
-        # Close button.
+        # Close button frame to ensure it stays at bottom
+        self.button_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.button_frame.grid(row=1, column=0, sticky="ew", pady=(0, 10))
+        self.button_frame.grid_columnconfigure(0, weight=1)
+
+        # Close button
         self.close_button = ctk.CTkButton(
-            self,
+            self.button_frame,
             text="Close README",
             command=self.close,
-            font=default_font
+            font=default_font,
+            width=120
         )
-        self.close_button.grid(row=1, column=0, sticky="ew", pady=(10, 0))
+        self.close_button.grid(row=0, column=0, pady=5)
 
     def load_readme_content(self):
         try:
