@@ -211,7 +211,6 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
     """
     Calibrate all input gain factors
     """
-    ## run
     send_notification('Calibrating...')
     send_notification(str(voltage))
     set_output_amplitude(voltage, hardware.sensor, hardware.relays, send_notification)
@@ -234,7 +233,7 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
             gain, gain_factor = gains_and_gainfactor
             if progress_bar:
                 current_step += 1
-                progress = (current_step/total_steps) * 100
+                progress = current_step/total_steps
                 progress_bar.set(progress)
 
             if _VCC_railing(gain_factor, estimated_current, gain):  
@@ -252,14 +251,14 @@ def calibrate_all(voltage, start_freq, end_freq, hardware, send_notification, nu
         # Update progress for frequency sweep
         if progress_bar:
             current_step += num_steps
-            progress = (current_step/total_steps) * 100
+            progress = current_step/total_steps
             progress_bar.set(progress)
 
         export_calibration_data(freqs, GainFactors, Sys_Phases, voltage, int(impedance))
         send_notification(str(impedance), newline=False)
 
     if progress_bar:
-        progress_bar.set(100)  # Ensure we end at 100%
+        progress_bar.set(1.0)  # Ensure we end at 100%
     send_notification("Calibration complete")
 
 def _VCC_railing(gain_factor, estimated_current, gain):
@@ -355,21 +354,18 @@ def conduct_binary_search_experiment(hardware, send_notification, voltage, imped
 
     # Calculate total steps including settling points
     total_steps = num_steps + 5  # Add 5 for settling points
-    current_step = 0
 
     # Repeat the first datapoint for settling with progress updates
-    for _ in range(5):
+    for i in range(5):
         real_temp, imag_temp = hardware.sensor.run_freq_sweep(freqs[0])
         if progress_bar:
-            current_step += 1
-            progress = (current_step/total_steps) * 100
+            progress = (i + 1) / total_steps
             progress_bar.set(progress)
 
     # Loop through each frequency with smooth progress updates
     for i, freq in enumerate(freqs):
         if progress_bar:
-            current_step += 1
-            progress = (current_step/total_steps) * 100
+            progress = (i + 5) / total_steps
             progress_bar.set(progress)
             
         impedance, real_adjusted, imag_adjusted, Phase = binary_search_gain(
@@ -380,7 +376,7 @@ def conduct_binary_search_experiment(hardware, send_notification, voltage, imped
 
     # Ensure progress bar reaches 100%
     if progress_bar:
-        progress_bar.set(100)
+        progress_bar.set(1.0)
     
     return freqs, real_results, imag_results, phase_results
 

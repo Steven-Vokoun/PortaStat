@@ -329,7 +329,13 @@ class EISWindow:
         self.progress_frame = ctk.CTkFrame(self.controls_frame, fg_color="transparent")
         self.progress_frame.pack(pady=(3,10), padx=5, anchor="n", fill=ctk.X)
 
+        # Create a custom progress bar that updates in a thread-safe way
         self.progress_bar = ctk.CTkProgressBar(self.progress_frame)
+        self._original_set = self.progress_bar.set
+        def thread_safe_set(value):
+            if value is not None:
+                self.root.after(0, self._original_set, value)
+        self.progress_bar.set = thread_safe_set
         self.progress_bar.set(0)  # Initialize to zero progress
         self.progress_bar.pack(fill=ctk.X, pady=3, padx=5)
 
@@ -338,6 +344,10 @@ class EISWindow:
             message = "\n" + message
         self.notification_box.insert(ctk.END, message)
         self.notification_box.see(ctk.END)
+
+    def _update_progress_safe(self, value):
+        """Update progress bar in a thread-safe way"""
+        self.root.after(0, self.progress_bar.set, value)
 
     # External Calls
     def export_data(self):
