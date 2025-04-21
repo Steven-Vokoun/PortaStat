@@ -26,6 +26,7 @@ class MainApplication(ctk.CTk):
         # Set fullscreen mode
         self.fullscreen = os.name != 'nt'  # True if not on Windows
         if self.fullscreen:
+            self.overrideredirect(True)
             self.attributes('-fullscreen', True)
         
         # Bind Escape key to toggle fullscreen

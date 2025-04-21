@@ -26,7 +26,7 @@ class EISWindow:
 
         self.spacing_type = ctk.StringVar(value="logarithmic")
         self.scan_speed = ctk.StringVar(value="fast")
-        self.circuit_type = ctk.StringVar(value="Series RC")
+        self.circuit_type = ctk.StringVar(value="Randles")
         self.voltage = 2_000
         self.output_location = ctk.StringVar(value="Counter")
         self.binary_search = ctk.BooleanVar(value=True)
@@ -173,7 +173,7 @@ class EISWindow:
         self.min_freq_label = ctk.CTkLabel(self.min_freq_frame, text="Min Frequency:")
         self.min_freq_label.pack(side=ctk.LEFT, padx=5)
         self.min_freq_slider = ctk.CTkSlider(self.min_freq_frame, from_=10, to=20000, command=self.update_min_freq_label)
-        self.min_freq_slider.set(5000)
+        self.min_freq_slider.set(3000)
         self.min_freq_slider.pack(side=ctk.LEFT, padx=5, fill=ctk.X, expand=True)
         self.min_freq_value_label = ctk.CTkLabel(self.min_freq_frame, text=f"{self.min_freq_slider.get()}", width=50)
         self.min_freq_value_label.pack(side=ctk.LEFT, padx=2)
